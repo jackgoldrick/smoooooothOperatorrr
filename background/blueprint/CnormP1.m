@@ -9,7 +9,6 @@ function res = CnormP1(N)
     normColumn =  oneVector * modMatrix;
 
     [res, ~] = max(normColumn);
-
     toc
 
 
