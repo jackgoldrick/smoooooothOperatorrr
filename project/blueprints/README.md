@@ -1,0 +1,1 @@
+The blueprints folder is our sandbox.  Please create a folder (ex: "projectTitle") within the following folders based on the language you are coding in.
