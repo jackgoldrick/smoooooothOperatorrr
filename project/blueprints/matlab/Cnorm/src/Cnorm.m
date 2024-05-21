@@ -41,6 +41,7 @@ classdef Cnorm
 
 
         end 
+        
         function res = pPower(obj, p, err_a)
             %% put this back to 2 when done testing
             if p == 0
@@ -60,6 +61,9 @@ classdef Cnorm
 
             end
 
+            cMatrix = obj.cMatrix;
+            cMatrixPrime = obj.cMatrix';
+
             tic
             loc = obj.colMaxP(obj, p);
             vNow = obj.hMatrix(:, loc);
@@ -70,13 +74,13 @@ classdef Cnorm
             vNow = vNow ./ oldGuess;
             while (error > err_a)
 
-                vNext = obj.cMatrix * vNow;
+                vNext = cMatrix * vNow;
 
                 guess = Cnorm.vectorPNorm(vNext, p);
 
                 vNextDualNormed =  vNext ./ guess;
 
-                z = obj.cMatrix' * vNextDualNormed;
+                z = cMatrixPrime * vNextDualNormed;
 
                 error = abs((guess - oldGuess) / guess);
 

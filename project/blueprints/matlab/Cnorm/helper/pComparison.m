@@ -1,4 +1,5 @@
-function pComparison(N, p)
+function [m, o, diff, N, p]= pComparison(N, p)
+    addpath ../src/
         
     cMatrix = Cnorm(N);
     if p ==2

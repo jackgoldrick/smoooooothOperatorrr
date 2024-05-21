@@ -1,5 +1,5 @@
 function comparison(N)
-        
+    addpath ../src/     
     
     cMatrix = Cnorm(N);
 
