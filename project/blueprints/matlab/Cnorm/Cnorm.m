@@ -19,7 +19,7 @@ classdef Cnorm
     end
 
     methods(Static)
-
+        %% P1 -> P1
         function res = P1(obj)
             tic
             oneVector = ones(1,length(obj.modMatrix(1,:)));
@@ -29,6 +29,76 @@ classdef Cnorm
             [res, ~] = max(normColumn);
             toc
         end
+        %% Pinf -> Pinf
+        function res = Pinf(obj)
+            tic
+            oneVector = ones(length(obj.modMatrix(1,:)), 1);
+            % modMatrix = sqrt((real(cMatrix)) .^ 2 + (imag(cMatrix)) .^ 2);
+            % on avg saves a bit of time compared to above line
+            normColumn =  obj.modMatrix * oneVector;
+            [res, ~] = max(normColumn);
+            toc
+
+
+        end 
+        function res = pPower(obj, p, err_a)
+            %% put this back to 2 when done testing
+            if p == 0
+
+                res = obj.P2power(obj, err_a);
+                return
+
+            elseif p == 1
+
+                res = obj.P1(obj);
+                return
+
+            elseif p == inf
+
+                res = obj.Pinf(obj);
+                return
+
+            end
+
+            tic
+            loc = obj.colMaxP(obj, p);
+            vNow = obj.hMatrix(:, loc);
+            q = 1 / (1 - 1/p);
+            error = 1;
+            res = 0;
+            oldGuess = Cnorm.vectorPNorm(vNow, p);
+            vNow = vNow ./ oldGuess;
+            while (error > err_a)
+
+                vNext = obj.cMatrix * vNow;
+
+                guess = Cnorm.vectorPNorm(vNext, p);
+
+                vNextDualNormed =  vNext ./ guess;
+
+                z = obj.cMatrix' * vNextDualNormed;
+
+                error = abs((guess - oldGuess) / guess);
+
+                % if Cnorm.vectorPNorm(z,q) <= z' * vNow| | error < err_a
+                if error < err_a
+                    break;
+
+                end
+
+                vNow =  z ./ Cnorm.vectorPNorm(z, q);
+                oldGuess = guess;
+
+
+                
+            end 
+            
+            res = guess;
+            toc
+
+
+        end 
+
 
         
         function res = P2power(obj,err_a)
@@ -92,7 +162,30 @@ classdef Cnorm
             end
 
 
+        end
+        
+        function res = colMaxP(obj, p)
+            modSquared = (obj.modMatrix) .^ p;
+            normColumn =  ones(1,length(obj.modMatrix(1,:))) * modSquared;
+            [~, res] = max(normColumn);
+            if (length(res) - 1)
+                res = res(1);
+            end
+
+
+        end
+
+        function res = vectorPNorm(v, p)
+            if (length(v(1,:)) == 1)
+                res = ones(1,length(v)) * (abs(v) .^ p);
+            else  
+                res = (abs(v) .^ p) * ones(length(v), 1);
+            end
+            res = (res) ^ (1/p);
+                
         end 
+               
+
  
         
 
