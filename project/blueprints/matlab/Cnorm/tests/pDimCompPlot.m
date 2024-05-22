@@ -1,4 +1,4 @@
-function pDimCompPlot(N, Nmax)
+function pDimCompPlot(N, ~)
     cMatrix = Cnorm(N);
     i = 1:pMax;
     norms = zeros(1, length(i));
@@ -31,4 +31,3 @@ end
 
 
 
-end
