@@ -5,9 +5,19 @@ function genCompPlot(N, dp, pMax, type, g)
             cMatrix = hadamard(N);
             norm(cMatrix, 1)
         case 'r'
-            cMatrix = rand(N, N);
+            if (length(N) - 1)
+                cMatrix = rand(N(1), N(2));
+
+            else
+                   cMatrix = rand(N, N);
+            end
         case 'c'
-            cMatrix = complex(rand(N, N), rand(N,N));
+            
+             if (length(N) - 1)
+                  cMatrix = complex(rand(N(1), N(2)), rand(N(1),N(2)));
+            else
+                 cMatrix = complex(rand(N, N), rand(N,N));
+            end
         case 'm'
             cMatrix = [ 0 1 -1; -1 0 1; 1 -1 0];
             cMatrix = cMatrix .* (1 / sqrt(3));

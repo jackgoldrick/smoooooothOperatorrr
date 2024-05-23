@@ -6,17 +6,17 @@ function res = genComparison(cMatrix, p, err_a)
     if p == 1 
         if colSize >= rowSize 
             if isreal(cMatrix(1,1))
-                res = pInf(cMatrix)
-                lab = norm(cMatrix, inf)
+                res = pInf(cMatrix) %#ok<NOPRT>
+                lab = norm(cMatrix, inf) %#ok<NOPRT,NASGU>
                 % res = p1(cMatrix)
                 % lab = norm(cMatrix, 1)
-                condition = cond(cMatrix)
+                condition = cond(cMatrix) %#ok<NOPRT,NASGU>
                 return
             else 
                 cMatrixPrime = cMatrix';
                 conjTransMatrix = cMatrixPrime * cMatrix;
 
-                res = pInf(conjTransMatrix)
+                res = pInf(conjTransMatrix) %#ok<NOPRT>
                 % res = p1(conjTransMatrix);
                 % res = pInf(cMatrix);
                 % res = p1(cMatrix);
