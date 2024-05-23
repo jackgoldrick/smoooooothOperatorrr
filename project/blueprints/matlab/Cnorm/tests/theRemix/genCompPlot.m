@@ -1,22 +1,22 @@
-function genCompPlot(N, dp, pMax, sMax, type, g)
+function genCompPlot(N, dp, pMax, type, g)
     %% Add you matrix you want to test here
     switch type
         case 'h'
             cMatrix = hadamard(N);
             norm(cMatrix, 1)
         case 'r'
-            if (length(N) - 1) %#ok<BDLOG>
+            if (length(N) - 1)
                 cMatrix = rand(N(1), N(2));
 
             else
-                   cMatrix = randn(N, N);
+                   cMatrix = rand(N, N);
             end
         case 'c'
             
-             if (length(N) - 1) %#ok<BDLOG>
-                  cMatrix = complex(randn(N(1), N(2)), randn(N(1),N(2)));
+             if (length(N) - 1)
+                  cMatrix = complex(rand(N(1), N(2)), rand(N(1),N(2)));
             else
-                 cMatrix = complex(randn(N, N), randn(N,N));
+                 cMatrix = complex(rand(N, N), rand(N,N));
             end
         case 'm'
             cMatrix = [ 0 1 -1; -1 0 1; 1 -1 0];
@@ -28,16 +28,6 @@ function genCompPlot(N, dp, pMax, sMax, type, g)
         case 'd'
             cMatrix = [ -2 1 1; 1 -2 1; 1 1 -2];
             cMatrix = cMatrix .* (1 / -3);
-        case 'j'
-            cMatrix = [ 37 0 83 0; 
-                        0 71 11 47; 
-                        83 11 17 0;
-                        0 47 0 5];
-        case 'g'
-            cMatrix = [ 37 0 91 0; 
-                        19 73 11 47; 
-                        83 94 17 0;
-                        13 32 23 5];
     end
 
     tic
@@ -61,7 +51,7 @@ function genCompPlot(N, dp, pMax, sMax, type, g)
         q = 1 / (1 - 1 / p(j));
         % Q(j) = q;
         
-        norms(j) = genComparison(cMatrix, p(j), .000000001, sMax);
+        norms(j) = genComparison(cMatrix, p(j), .0000001);
 
         if type == 'h'
             correctNorms(j) = max(N ^ (1/p(j)), N ^ (1 / q));
