@@ -7,6 +7,10 @@ function res = genComparison(cMatrix, p, err_a)
         if colSize >= rowSize 
             if isreal(cMatrix(1,1))
                 res = pInf(cMatrix)
+                lab = norm(cMatrix, inf)
+                % res = p1(cMatrix)
+                % lab = norm(cMatrix, 1)
+                condition = cond(cMatrix)
                 return
             else 
                 cMatrixPrime = cMatrix';
@@ -62,7 +66,6 @@ function res = genComparison(cMatrix, p, err_a)
     vNow = vNow ./ oldGuess;
     
     while (error > err_a)
-        
             
         vNext = cMatrixPrime * vNow;
 
@@ -79,11 +82,12 @@ function res = genComparison(cMatrix, p, err_a)
             break;
 
         end
+        % These lines can be commented out
+        z = z ./ vectorPNorm(z, inf);
+        z = (abs(z).^ (q-1)) .* (sign(z));
 
         vNow =  z ./ vectorPNorm(z, p);
         oldGuess = guess;
-
-
         
     end 
     

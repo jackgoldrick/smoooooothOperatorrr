@@ -15,6 +15,9 @@ function genCompPlot(N, dp, pMax, type, g)
             cMatrix = [ 1 0 1 0; 0 1 0 1];
         case 'p'
             cMatrix = transpose([ 1 0 1 0; 0 1 0 1]);
+        case 'd'
+            cMatrix = [ -2 1 1; 1 -2 1; 1 1 -2];
+            cMatrix = cMatrix .* (1 / -3);
     end
 
     tic
@@ -61,7 +64,7 @@ function genCompPlot(N, dp, pMax, type, g)
 
     end
 
-    if type == 'c'
+    if type == 'c'|| type == 'r'
         
         for i=2:length(norms)
             if ~(isnan(norms(i)))
@@ -99,6 +102,11 @@ function genCompPlot(N, dp, pMax, type, g)
                     plot(p, correctNormsP, '-.', 'Color', "#D95319", "LineWidth", 1); 
                     plot(p, correctNormsMax, '-g', 'LineWidth', 1);
                     legend("Our Method", "Exact Q", "Exact P", "Exact Max");
+                    
+                elseif type == 'd'
+                    plot(p, norms, '--b', 'LineWidth', 1);
+                    plot(p, 1, '-r');
+                    legend("Our Method", "Lower Bound");
                 else 
                     plot(p, norms, '--b', 'LineWidth', 1);
                     plot(p, correctNorms, '-r');
