@@ -34,10 +34,15 @@ function genCompPlot(N, dp, pMax, sMax, type, g)
                         83 11 17 0;
                         0 47 0 5];
         case 'g'
-            cMatrix = [ 37 0 91 0; 
+            cMatrix = [ 37 0  91  0; 
                         19 73 11 47; 
-                        83 94 17 0;
+                        83 94 17  0;
                         13 32 23 5];
+        case 's'
+            cMatrix = [ 3  1; 
+                        1  3; 
+                        3 -1;
+                        -1 3];
     end
 
     tic
@@ -61,7 +66,7 @@ function genCompPlot(N, dp, pMax, sMax, type, g)
         q = 1 / (1 - 1 / p(j));
         % Q(j) = q;
         
-        norms(j) = genComparison(cMatrix, p(j), .000000001, sMax);
+        [norms(j), ~] = genComparison(cMatrix, p(j), .000000001, sMax);
 
         if type == 'h'
             correctNorms(j) = max(N ^ (1/p(j)), N ^ (1 / q));
