@@ -1,6 +1,9 @@
-function genCompPlot(N, dp, pMax, sMax, type, g)
+function genCompPlot(N, dp, pMax, sMax, type, g, pq, r)
     %% Add you matrix you want to test here
     switch type
+        case 'i'
+            cMatrix = eye(N);
+            
         case 'h'
             cMatrix = hadamard(N);
             norm(cMatrix, 1)
@@ -22,12 +25,16 @@ function genCompPlot(N, dp, pMax, sMax, type, g)
             cMatrix = [ 0 1 -1; -1 0 1; 1 -1 0];
             cMatrix = cMatrix .* (1 / sqrt(3));
         case 'a'
-            cMatrix = [ 1 0 1 0; 0 1 0 1];
+            cMatrix = [ 1 0 1 0; 
+                        0 1 0 1];
         case 'p'
             cMatrix = transpose([ 1 0 1 0; 0 1 0 1]);
         case 'd'
             cMatrix = [ -2 1 1; 1 -2 1; 1 1 -2];
             cMatrix = cMatrix .* (1 / -3);
+        case 'e'
+            cMatrix = [ 1 3; 
+                        2 4];
         case 'j'
             cMatrix = [ 37 0 83 0; 
                         0 71 11 47; 
@@ -43,6 +50,7 @@ function genCompPlot(N, dp, pMax, sMax, type, g)
                         1  3; 
                         3 -1;
                         -1 3];
+
     end
 
     tic
@@ -59,33 +67,39 @@ function genCompPlot(N, dp, pMax, sMax, type, g)
     else 
         correctNorms = zeros(1, length(p));
     end
-    % Q = zeros(1, length(p));
+    % colSize = length(cMatrix(1,:));
+    % vMax = ones(colSize, 1);
 
-    %% Add  your solution here  
+
+    %% Add  your solution here 
     for j = 1:length(p)
         q = 1 / (1 - 1 / p(j));
         % Q(j) = q;
+        if pq == 'n'
+            [norms(j), ~] = genComparison(cMatrix, p(j), .000000001, sMax);
+        else
+            [norms(j), ~] = genComparisonPQ(cMatrix, p(j), r, .000000001, sMax);
+        end
+
+
+
+        if g == 'y'
+            if type == 'h'
+                correctNorms(j) = max(N ^ (1/p(j)), N ^ (1 / q));
         
-        [norms(j), ~] = genComparison(cMatrix, p(j), .000000001, sMax);
 
-        if type == 'h'
-            correctNorms(j) = max(N ^ (1/p(j)), N ^ (1 / q));
-     
+            elseif type == 'a' || type == 'p'
+                correctNormsMax(j) = max(2 ^ (1 / q), 2 ^ (1 / p(j)));
+                correctNormsQ(j) = 2 ^ (1 / q);
+                correctNormsP(j) = 2 ^ (1 / p(j));
 
-        elseif type == 'a' || type == 'p'
-            correctNormsMax(j) = max(2 ^ (1 / q), 2 ^ (1 / p(j)));
-            correctNormsQ(j) = 2 ^ (1 / q);
-            correctNormsP(j) = 2 ^ (1 / p(j));
+            elseif p(j) <= 2 && type == 'm'
+                correctNorms(j) = ((1 + 2 ^(p(j) - 1)) ^ (1/(p(j)))) / sqrt(3);
 
-        elseif p(j) <= 2 && type == 'm'
-            correctNorms(j) = ((1 + 2 ^(p(j) - 1)) ^ (1/(p(j)))) / sqrt(3);
-
-        elseif p(j) > 2 && type == 'm'
-            correctNorms(j) = ((1 + 2 ^(q - 1)) ^ (1/(q))) / sqrt(3);
-        end 
-
-         
-
+            elseif p(j) > 2 && type == 'm'
+                correctNorms(j) = ((1 + 2 ^(q - 1)) ^ (1/(q))) / sqrt(3);
+            end 
+        end
 
     end
 
@@ -127,7 +141,10 @@ function genCompPlot(N, dp, pMax, sMax, type, g)
                     plot(p, correctNormsP, '-.', 'Color', "#D95319", "LineWidth", 1); 
                     plot(p, correctNormsMax, '-g', 'LineWidth', 1);
                     legend("Our Method", "Exact Q", "Exact P", "Exact Max");
-                    
+                elseif type == 'i'
+                    plot(p, norms, '--b', 'LineWidth', 1);
+                    plot(p, N .^ (1/r  - 1./p), '-r');
+                    legend("Our Method", "Exact Value");
                 elseif type == 'd'
                     plot(p, norms, '--b', 'LineWidth', 1);
                     plot(p, 1, '-r');
