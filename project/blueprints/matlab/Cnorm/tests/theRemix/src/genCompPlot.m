@@ -1,50 +1,101 @@
-function genCompPlot(N, dp, pMax, sMax, type, g, pq, r)
-    %% Add you matrix you want to test here
+%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
+    %%                                                                                                                         %%
+        %% 'N' - size of NxN matrix. If N is a vector, then for any MxN matrix, N := [M N];                                %%
+        %% 'dp' - step size of the value of P                                                                              %%
+        %% 'pMax' - max value of P to compute                                                                              %%
+        %% 'sMax' - The number of random guess vectors used to compute each P->P or P->R                                   %%
+        %% 'type' - The type of matrix to compute                                                                          %%
+        %% 'gp' - Graphs the P->P depending on this flag                                                                   %%
+        %%     'y' - yes graph                                                                                             %%
+        %%     'n' - no graph                                                                                              %%
+        %% 'pq' - Computes the P->P and/or P->R depending on this flag                                                     %%
+        %%     'b' - computes P->R with O(sizeP * sizeR) total operator norms calculated with graph                        %%
+        %%     'q' - computes P->R for ONE value of q ONLY                                                                 %%
+        %%     'g' - computes P->P and P->Q with O(sizeP * (sizeR + 1)) total operator norms calculated without graph      %%
+        %%     'p' - computes P->P ONLY                                                                                    %%
+        %% 'rv' - values of R to compute. If vector => rv := [rMin rMax]. If scalar => alg runs against one value of R     %%
+        %% 'dr' - step size of the value of R                                                                              %%
+    %%                                                                                                                         %%
+%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
+function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
+    %% Test Matricies (type)
+      % 'a' - 2x4 of 1s on the Diagnol 
+      % 'b' - 
+      % 'c' - MxN Random (Normal Distribution) Complex Matrix
+      % 'd' - 3x3 Alonso's example that is elementwise divided by -3
+      % 'e' - 2x2 1234 example from the slides
+      % 'f' - 
+      % 'g' - 4x4 example with real primes as entries
+      % 'h' - NxN Hadamard Matrix
+      % 'i' - NxN Identity Matrix 
+      % 'j' - 4x4 Symmetric Matrix with zeros and Primes
+      % 'k' - 
+      % 'l' - 
+      % 'm' - 3x3 Alonso's example that is elementwise divided by sqrt(3)
+      % 'n' - 
+      % 'o' - 
+      % 'p' - 4x2 trasnpose of case 'a'
+      % 'q' - 
+      % 'r' - MxN Random (Normal Distribution) Real Matrix
+      % 's' - 4x2 Wilson's example with 3, 1, -1 on diagnols and off diagnols
+      % 't' - 
+      % 'u' - 
+      % 'v' -
+
     switch type
-        case 'i'
-            cMatrix = eye(N);
-            
+        case 'a'
+            cMatrix = [ 1 0 1 0; 
+                        0 1 0 1];
+
+        case 'c'
+            if (length(N) - 1) %#ok<BDLOG>
+                cMatrix = complex(randn(N(1), N(2)), randn(N(1),N(2)));
+            else
+                cMatrix = complex(randn(N, N), randn(N,N));
+            end
+
+        case 'd'
+            cMatrix = [ -2 1 1; 1 -2 1; 1 1 -2];
+            cMatrix = cMatrix .* (1 / -3);
+
+        case 'e'
+            cMatrix = [ 1 3; 
+                        2 4];
+
+        case 'g'
+            cMatrix = [ 37 0  91  0; 
+                        19 73 11 47; 
+                        83 97 17  0;
+                        13 32 23 5];
+
         case 'h'
             cMatrix = hadamard(N);
             norm(cMatrix, 1)
+            
+        case 'i'
+            cMatrix = eye(N);
+            
+        case 'j'
+            cMatrix = [ 37 0 83  0; 
+                        0 71 11 47; 
+                        83 11 17 0;
+                        0  47  0 5];
+
+        case 'm'
+            cMatrix = [ 0 1 -1; -1 0 1; 1 -1 0];
+            cMatrix = cMatrix .* (1 / sqrt(3));
+
+        case 'p'
+            cMatrix = transpose([ 1 0 1 0; 0 1 0 1]);
+
         case 'r'
             if (length(N) - 1) %#ok<BDLOG>
                 cMatrix = rand(N(1), N(2));
 
             else
-                   cMatrix = randn(N, N);
+                cMatrix = randn(N, N);
             end
-        case 'c'
-            
-             if (length(N) - 1) %#ok<BDLOG>
-                  cMatrix = complex(randn(N(1), N(2)), randn(N(1),N(2)));
-            else
-                 cMatrix = complex(randn(N, N), randn(N,N));
-            end
-        case 'm'
-            cMatrix = [ 0 1 -1; -1 0 1; 1 -1 0];
-            cMatrix = cMatrix .* (1 / sqrt(3));
-        case 'a'
-            cMatrix = [ 1 0 1 0; 
-                        0 1 0 1];
-        case 'p'
-            cMatrix = transpose([ 1 0 1 0; 0 1 0 1]);
-        case 'd'
-            cMatrix = [ -2 1 1; 1 -2 1; 1 1 -2];
-            cMatrix = cMatrix .* (1 / -3);
-        case 'e'
-            cMatrix = [ 1 3; 
-                        2 4];
-        case 'j'
-            cMatrix = [ 37 0 83 0; 
-                        0 71 11 47; 
-                        83 11 17 0;
-                        0 47 0 5];
-        case 'g'
-            cMatrix = [ 37 0  91  0; 
-                        19 73 11 47; 
-                        83 94 17  0;
-                        13 32 23 5];
+        
         case 's'
             cMatrix = [ 3  1; 
                         1  3; 
@@ -53,82 +104,110 @@ function genCompPlot(N, dp, pMax, sMax, type, g, pq, r)
 
     end
 
-    tic
+    programTime = tic;
+    p = dp:dp:pMax;
+    sizeP = length(p);
 
+    if pq == 'g'
+        r = rv(1):dr:rv(2);
+        sizeR = length(r);
+        norms3D = zeros(sizeP, sizeR);
 
-    p = 1:dp:pMax;
+    else
+        norms = zeros(sizeP, 1);
+        if ~(length(rv) - 1)
+            r = rv;
+        else 
+            r = rv(1);
+        end
+    end 
+    
 
-    norms = zeros(1, length(p));
     if type == 'a' || type == 'p'
-        correctNormsMax = zeros(1, length(p));
-        correctNormsQ = zeros(1, length(p));
-        correctNormsP = zeros(1, length(p));
+        correctNormsMax = zeros(1, sizeP);
+        correctNormsQ = zeros(1, sizeP);
+        correctNormsP = zeros(1, sizeP);
 
     else 
-        correctNorms = zeros(1, length(p));
+        correctNorms = zeros(1, sizeP);
     end
-    % colSize = length(cMatrix(1,:));
-    % vMax = ones(colSize, 1);
 
 
-    %% Add  your solution here 
-    for j = 1:length(p)
-        q = 1 / (1 - 1 / p(j));
-        % Q(j) = q;
-        if pq == 'n'
+    %% Computes the P->P and/or P->R depending on pq flag
+     % 'b' - computes P->R with O(sizeP * sizeR) total operator norms calculated with graph
+     % 'q' - computes P->R for ONE value of R ONLY
+     % 'g' - computes P->P and P->R with O(sizeP * (sizeR + 1)) total operator norms calculated without graph
+     % 'p' - computes P->P ONLY
+    compTime = tic;
+    fprintf('Computing... \n');
+
+    if pq == 'b' 
+        fprintf('Note: Algorithm is ran %10.1f times \n', sizeP * (sizeR + 1));
+
+    elseif pq == 'g'
+        fprintf('Note: Algorithm is ran %10.1f times \n', sizeP * sizeR);
+    else 
+        fprintf('Note: Algorithm is ran %10.1f times \n', sizeP);
+
+    end 
+
+    for j = 1:sizeP    
+        if pq == 'b'
+            for k =1:sizeR
+                [norms3D(j, k), ~] = genComparisonPQ(cMatrix, p(j), r(k), .000000001, sMax);
+            end
             [norms(j), ~] = genComparison(cMatrix, p(j), .000000001, sMax);
-        else
+        elseif pq == 'g'
+            for k =1:sizeR
+                [norms3D(j, k), ~] = genComparisonPQ(cMatrix, p(j), r(k), .000000001, sMax);
+            end
+        elseif pq == 'q'
             [norms(j), ~] = genComparisonPQ(cMatrix, p(j), r, .000000001, sMax);
+        else
+            [norms(j), ~] = genComparison(cMatrix, p(j), .000000001, sMax);
+            
         end
-
-
-
-        if g == 'y'
-            if type == 'h'
-                correctNorms(j) = max(N ^ (1/p(j)), N ^ (1 / q));
+    end
+    fprintf('Done! \n');
+    toc(compTime)
+    
+    
         
+    if gp == 'y'
+        fprintf('\nCollecting Exact Values... ')
+        if type == 'h'
+            for j = 1:sizeP
+                q = 1 / (1 - 1 / p(j));
+                correctNorms(j) = max(N ^ (1/p(j)), N ^ (1 / q));
+            end 
 
-            elseif type == 'a' || type == 'p'
+        elseif type == 'a' || type == 'p'
+            for j = 1:sizeP
+                q = 1 / (1 - 1 / p(j));
                 correctNormsMax(j) = max(2 ^ (1 / q), 2 ^ (1 / p(j)));
                 correctNormsQ(j) = 2 ^ (1 / q);
                 correctNormsP(j) = 2 ^ (1 / p(j));
-
-            elseif p(j) <= 2 && type == 'm'
-                correctNorms(j) = ((1 + 2 ^(p(j) - 1)) ^ (1/(p(j)))) / sqrt(3);
-
-            elseif p(j) > 2 && type == 'm'
-                correctNorms(j) = ((1 + 2 ^(q - 1)) ^ (1/(q))) / sqrt(3);
-            end 
-        end
-
-    end
-
-    if type == 'c'|| type == 'r'
-        
-        for i=2:length(norms)
-            if ~(isnan(norms(i)))
-                break;
             end
-        end
-        % I wonder if this ratio can be seen as an approximation error
-        % need to compute sequence of ratios.
-        % this should converge 
-        if i == length(norms)
-            ratio = 0 %#ok<NASGU,NOPRT>
-        else
-            i %#ok<NOPRT>
-            ratio = norms(i) / norms(1) %#ok<NASGU,NOPRT>
-            pValue = 1 + i *dp %#ok<NASGU,NOPRT>
 
-        end
+        elseif p(j) <= 2 && type == 'm'
+            for j = 1:sizeP
+                correctNorms(j) = ((1 + 2 ^(p(j) - 1)) ^ (1/(p(j)))) / sqrt(3);
+            end
 
-            
+        elseif p(j) > 2 && type == 'm'
+            for j = 1:sizeP
+                q = 1 / (1 - 1 / p(j));
+                correctNorms(j) = ((1 + 2 ^(q - 1)) ^ (1/(q))) / sqrt(3);
+            end
+        end 
         
-        
+        fprintf("Done! \n");
     end
-    % norms(j) = hadComparison(cMatrix, inf, .0000001);
-
-    if g == 'y'
+    
+    %% P->P Plotting from gp flag
+    if gp == 'y'
+        plotTime = tic;
+        fprintf('\nPlotting P->P...')
         figure
             hold on
                 xlabel("p");
@@ -155,7 +234,31 @@ function genCompPlot(N, dp, pMax, sMax, type, g, pq, r)
                     legend("Our Method", "Exact Value");
                 end
             hold off
+        fprintf("Done! \n");
+        toc(plotTime)
     end
-    toc
+    
+
+    %% 3D Plot 
+    if pq == 'g' 
+        surfPlotTime = tic;
+        fprintf('\nPlotting P->R Surface... \n');
+        
+        figure
+            hold on
+                xlabel("r");
+                ylabel("p");
+                zlabel("P->R Operator Norm Value");
+                title("Operator Norm vs r,p");
+                surf(r, p, norms3D);
+                legend("Our Method");
+            hold off
+            
+        fprintf("Done! \n ");
+        toc(surfPlotTime)
+    end
+    
+    fprintf('\nProgram Runtime:');
+    toc(programTime)
 
 end 
