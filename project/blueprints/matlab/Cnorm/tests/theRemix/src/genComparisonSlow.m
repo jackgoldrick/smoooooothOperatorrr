@@ -1,48 +1,59 @@
-function [res, vMax] = genComparisonPQ(cMatrix, p, r, err_a, sMax)
+function [res, vMax] = genComparisonSlow(cMatrix, p, err_a, sMax)
 
 % rowSize = length(cMatrix(:,1));
-colSize = length(cMatrix(1,:));
-vMax = zeros(colSize, 1);
+
 
 
 if p == 1
-    res = max(vectorPNorm(cMatrix, r)); 
+    [res, m] = p1(cMatrix);
+    vMax = cMatrix(m, :);
     return
 end
-
 cMatrixPrime = cMatrix';
 
+
 q = 1 / (1 - 1/p);
-s = 1 / (1 - 1 ./ r);
 
 error = 1; %#ok<NASGU>
 res = 0; %#ok<NASGU>
 
-x = randn(colSize, sMax,"like",1i);
-    
-xNorm = vectorPNorm(x, p);
+if p > 2 
+    temp = p;
+    p = q;
+    q = temp;
 
+    temp = cMatrix;
+    cMatrix = cMatrixPrime;
+    cMatrixPrime = temp;
+
+
+end
+
+colSize = length(cMatrix(1,:));
+x = randn(colSize, sMax,"like",1i);
+vMax = ones(colSize, 1);
+xNorm = vectorPNorm(x, p);
 x = x ./ xNorm;
 oldGuess = 0;
 
 while (true)
     
     y = cMatrix * x;
-        
-    yDual = (abs(y).^ (r-1)) .* (sign(y));
     
-    yDual =  yDual ./ vectorPNorm(yDual,s);
+    yDual = (abs(y).^ (p-1)) .* (sign(y));
     
-    z = cMatrixPrime * yDual;
+    yDual =  yDual ./ vectorPNorm(yDual, q);
     
-    guess = max(vectorPNorm(y, r));
+
+    [guess, index] = max(vectorPNorm(y, p));
     
     if abs(guess - oldGuess) < err_a
-        vMax = y;
+        vMax = y(:, index);
         break;
         
     end
 
+    z = cMatrixPrime * yDual;
     zDual = (abs(z).^ (q-1)) .* (sign(z));
     zDual =  zDual ./ vectorPNorm(zDual, p);
 

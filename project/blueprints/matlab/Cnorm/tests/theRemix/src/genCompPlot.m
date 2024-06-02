@@ -1,17 +1,22 @@
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
     %%                                                                                                                         %%
+        %% Author: @jackgoldrick                                                                                           %%
+        %% Repository: https://github.com/jackgoldrick/smoooooothOperatorrr                                                %%
+        %%                                                                                                                 %%
+        %%                                                                                                                 %%
+        %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%                                                                                            
         %% 'N' - size of NxN matrix. If N is a vector, then for any MxN matrix, N := [M N];                                %%
         %% 'dp' - step size of the value of P                                                                              %%
         %% 'pMax' - max value of P to compute                                                                              %%
         %% 'sMax' - The number of random guess vectors used to compute each P->P or P->R                                   %%
         %% 'type' - The type of matrix to compute                                                                          %%
         %% 'gp' - Graphs the P->P depending on this flag                                                                   %%
-        %%     'y' - yes graph                                                                                             %%
-        %%     'n' - no graph                                                                                              %%
+        %%     'y' - yes P->P Graph                                                                                        %%
+        %%     'n' - no P->P Graph                                                                                         %%
         %% 'pq' - Computes the P->P and/or P->R depending on this flag                                                     %%
-        %%     'b' - computes P->R with O(sizeP * sizeR) total operator norms calculated with graph                        %%
+        %%     'g' - computes P->R with O(sizeP * (sizeR + 1)) total operator norms calculated with graph                  %%
         %%     'q' - computes P->R for ONE value of q ONLY                                                                 %%
-        %%     'g' - computes P->P and P->Q with O(sizeP * (sizeR + 1)) total operator norms calculated without graph      %%
+        %%     'b' - computes P->P and P->Q with O(sizeP * sizeR) total operator norms calculated without graph            %%
         %%     'p' - computes P->P ONLY                                                                                    %%
         %% 'rv' - values of R to compute. If vector => rv := [rMin rMax]. If scalar => alg runs against one value of R     %%
         %% 'dr' - step size of the value of R                                                                              %%
@@ -105,21 +110,25 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
     end
 
     programTime = tic;
-    p = dp:dp:pMax;
+    p = 1:dp:pMax;
     sizeP = length(p);
+    if nargin == 9
+        if pq == 'g'
+            r = rv(1):dr:rv(2);
+            sizeR = length(r);
+            norms3D = zeros(sizeP, sizeR);
 
-    if pq == 'g'
-        r = rv(1):dr:rv(2);
+        else
+            norms = zeros(sizeP, 1);
+            if ~(length(rv) - 1) %#ok<BDLOG>
+                r = rv;
+            else 
+                r = rv(1);
+            end
+        end 
         sizeR = length(r);
-        norms3D = zeros(sizeP, sizeR);
-
     else
-        norms = zeros(sizeP, 1);
-        if ~(length(rv) - 1)
-            r = rv;
-        else 
-            r = rv(1);
-        end
+        sizeR = 1;
     end 
     
 
@@ -134,37 +143,40 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
 
 
     %% Computes the P->P and/or P->R depending on pq flag
-     % 'b' - computes P->R with O(sizeP * sizeR) total operator norms calculated with graph
+     % 'g' - computes P->R with O(sizeP * (sizeR + 1)) total operator norms calculated with graph
      % 'q' - computes P->R for ONE value of R ONLY
-     % 'g' - computes P->P and P->R with O(sizeP * (sizeR + 1)) total operator norms calculated without graph
-     % 'p' - computes P->P ONLY
+     % 'g' - computes P->P and P->R with O(sizeP * sizeR) total operator norms calculated without graph
+     % 'p' - computes P->P ONLY 
     compTime = tic;
     fprintf('Computing... \n');
 
-    if pq == 'b' 
-        fprintf('Note: Algorithm is ran %10.1f times \n', sizeP * (sizeR + 1));
+    if pq == 'g' 
+        fprintf('Note: P->P and P->R Algorithms ran %10.f times \n', (sizeP * (sizeR + 1)));
 
-    elseif pq == 'g'
-        fprintf('Note: Algorithm is ran %10.1f times \n', sizeP * sizeR);
+    elseif pq == 'b'
+        fprintf('Note: P->R Algorithm is ran %10.f times \n', sizeP * sizeR);
     else 
-        fprintf('Note: Algorithm is ran %10.1f times \n', sizeP);
+        fprintf('Note: P->P Algorithm is ran %10.f times \n', sizeP);
 
     end 
-
+    vMax2 = zeros(length(cMatrix(1,:)), 1);
     for j = 1:sizeP    
-        if pq == 'b'
-            for k =1:sizeR
-                [norms3D(j, k), ~] = genComparisonPQ(cMatrix, p(j), r(k), .000000001, sMax);
+        if pq == 'g'
+            for k = 1:sizeR
+                [norms3D(j, k), ~] = pqPower(cMatrix, p(j), r(k), .000000001, sMax);
             end
-            [norms(j), ~] = genComparison(cMatrix, p(j), .000000001, sMax);
-        elseif pq == 'g'
+            [norms(j), vMax] = pPower(cMatrix, p(j), .000000001, sMax, vMax2);
+            vMax2 = vMax;
+        elseif pq == 'b'
             for k =1:sizeR
-                [norms3D(j, k), ~] = genComparisonPQ(cMatrix, p(j), r(k), .000000001, sMax);
+                [norms3D(j, k), ~] = pqPower(cMatrix, p(j), r(k), .000000001, sMax);
             end
         elseif pq == 'q'
-            [norms(j), ~] = genComparisonPQ(cMatrix, p(j), r, .000000001, sMax);
+            [norms(j), ~] = pqPower(cMatrix, p(j), r, .000000001, sMax);
         else
-            [norms(j), ~] = genComparison(cMatrix, p(j), .000000001, sMax);
+            % [norms(j), ~] = pPower(cMatrix, p(j), .0000001, sMax);
+            [norms(j), vMax] = pPower(cMatrix, p(j), .000000001, sMax, vMax2);
+            vMax2 = vMax;
             
         end
     end
@@ -208,28 +220,28 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
     if gp == 'y'
         plotTime = tic;
         fprintf('\nPlotting P->P...')
-        figure
+        figure1 = figure;
             hold on
                 xlabel("p");
                 ylabel("Operator Norm Value");
                 title("Operator Norm vs p");
                 
                 if type == 'a' || type == 'p'
-                    plot(p, norms, '--b', 'LineWidth', 2);
+                    plot(p, norms, '-b', 'LineWidth', 2);
                     plot(p, correctNormsQ, ':r', 'LineWidth', 1);
                     plot(p, correctNormsP, '-.', 'Color', "#D95319", "LineWidth", 1); 
                     plot(p, correctNormsMax, '-g', 'LineWidth', 1);
                     legend("Our Method", "Exact Q", "Exact P", "Exact Max");
                 elseif type == 'i'
-                    plot(p, norms, '--b', 'LineWidth', 1);
+                    plot(p, norms, '-b', 'LineWidth', 1);
                     plot(p, N .^ (1/r  - 1./p), '-r');
                     legend("Our Method", "Exact Value");
                 elseif type == 'd'
-                    plot(p, norms, '--b', 'LineWidth', 1);
+                    plot(p, norms, '-b', 'LineWidth', 1);
                     plot(p, 1, '-r');
                     legend("Our Method", "Lower Bound");
                 else 
-                    plot(p, norms, '--b', 'LineWidth', 1);
+                    plot(p, norms, '-b', 'LineWidth', 1);
                     plot(p, correctNorms, '-r');
                     legend("Our Method", "Exact Value");
                 end
@@ -238,13 +250,27 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
         toc(plotTime)
     end
     
+    figure
+    % 1 -> k
+    % 2 -> wn
+    % 3 -> eta
+  
+        % model = @(x) ((abs(x(1)) .* (x(2) .^ 2)) ./ sqrt((x(2).^2 + p.^2).^2 + 4 .* (x(2) .*(x(3) .* p).^2))) - norms;
+
+        % hold on
+        %     xlabel("p");
+        %     ylabel("Operator Norm Value");
+        %     title("FFT of Operator Norm vs p");
+        %     regNorms = lsqnonlin(model, [1 1 1]);
+        %     plot(p,  model(regNorms), '-g', 'LineWidth', 1);
+        % hold off
 
     %% 3D Plot 
     if pq == 'g' 
         surfPlotTime = tic;
         fprintf('\nPlotting P->R Surface... \n');
         
-        figure
+        figure2 = figure;
             hold on
                 xlabel("r");
                 ylabel("p");
@@ -258,7 +284,8 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
         toc(surfPlotTime)
     end
     
-    fprintf('\nProgram Runtime:');
+    fprintf('\nProgram Runtime:\n');
     toc(programTime)
-
+    
+%     saveas(figure2,'randomMatrix32_.1_10_20_hyg_1_10_.1.fig' ) 
 end 

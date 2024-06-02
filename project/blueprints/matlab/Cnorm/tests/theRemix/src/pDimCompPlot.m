@@ -8,7 +8,7 @@ function pDimCompPlot(N, ~)
         norms(j) = Cnorm.pPower(cMatrix, i(j), .0000001);
     end
 
-    figure()
+    fig2 = figure();
         hold on
             xlabel("Dimension");
             ylabel("Operator Norm Value");
