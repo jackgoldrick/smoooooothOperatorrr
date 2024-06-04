@@ -67,10 +67,10 @@ while (true)
     
     z = cMatrixPrime * yDual;
     
-    guess = max(vectorPNorm(y, r));
+    [guess, index] = max(vectorPNorm(y, r));
     
     if abs(guess - oldGuess) < err_a
-        vMax = y;
+        vMax = x(:, index);
         break;
         
     end

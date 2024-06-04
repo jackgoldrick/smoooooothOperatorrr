@@ -1,6 +1,6 @@
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
     %%                                                                                                                         %%
-        %% Author: @jackgoldrick @wiwu2390                                                                                           %%
+        %% Author: @jackgoldrick @wiwu2390                                                                                 %%
         %% Repository: https://github.com/jackgoldrick/smoooooothOperatorrr                                                %%
         %%                                                                                                                 %%
         %%                                                                                                                 %%
@@ -23,103 +23,100 @@
     %%                                                                                                                         %%
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
 
-function [guess, pNormStackA] = maxSimDiag(diagonalStackA, matrixU, p, step, err_a)
+function [result, pNormStackA] = maxSimDiag(diagonalStackA, matrixU, p, step, sMax, err_a)
     dim1 = length(matrixU(1,:));
     dim2 = length(diagonalStackA(:,1));
-    error = 1;
+    errorScale = 100;
+    result = 0;
     q = 1 / (1 - 1/p);
-    % if  arg(1) == 'r'
-    %     if (length(N) - 1) %#ok<BDLOG>
-    %         for i=1:arg(2)
-    %             xMatrix = complex(randn(N(1), N(2)), randn(N(1),N(2)));
-    %             yMatrix = complex(randn(N(1), N(2)), randn(N(1),N(2)));
-    
-    
-    %     else
-    %         xMatrix = complex(randn(N, N), randn(N,N));
-    %         yMatrix = complex(randn(N, N), randn(N,N));
-    %     end
-    % end
-    
-    
-    diagonalStackB = complex(randn(dim2, dim1), randn(dim2, dim1));
-    
-    v = complex(randn(dim1, 1), randn(dim1, 1));
-    
-    w = complex(randn(dim1, 1), randn(dim1, 1));
-    
-    matrixUinv = inv(matrixU);
     
     stackA = zeros(dim1 *dim2, dim1);
     stackB = zeros(dim1, dim1 * dim2);
-    
+    matrixUinv = inv(matrixU);
+
     for i=0:dim2 - 1
     
-        stackA(((i  * dim1) + 1):((i+1) * dim1), :) = matrixU *  diag(diagonalStackA(i + 1, :)) * matrixUinv;
+        stackA(((i  * dim1) + 1):((i+1) * dim1), :) = matrixU *  diag(diagonalStackA(i + 1, :)) * matrixUinv; %#ok<*MINV>
     end
     
     
     
-    
-    [pNormStackA, vMax] = pPower(stackA, p, .000000001, 25);
-    
-    pNormStackA
-    pNormBA = 0;
-    
-    oldGuess = 0;
-    
-    
-    
-    while (true)
-        for i=0:dim2 - 1
-    
-            stackB(:, ((i  * dim1) + 1):((i+1) * dim1)) = matrixU *  diag(diagonalStackB(i + 1, :)) * matrixUinv;
-        end
-        [normStackB, vMax] = pPower(stackB, p, .000000001, 25, vMax);
-        diagonalStackB = diagonalStackB ./ normStackB;
-        diagSum = sum((diagonalStackA .* diagonalStackB), 1);
-    
-        vDual = ((w' * matrixU) .* diagSum) * matrixUinv;
-        v = dual(vDual, q).';
-        vNorm = vectorPNorm(v.', p);
-        wDual =  matrixU * (diagSum.' .* (matrixUinv * v));
-        w = dual(wDual, p);
-        wNorm = vectorPNorm(w, q);
-        wPrime_U = w' * matrixU;
-        matrixUinv_v = matrixUinv * v;
-    
-        guess = wPrime_U * (diagSum.' .* matrixUinv_v);
-        guess = abs(guess);
-        gradient = zeros(dim2, dim1);
-    
-        for i=1:dim2
-    
-            gradient(i, :) = (wPrime_U) .* diagonalStackA(i,:) .* (matrixUinv_v).';
-        end
-    
-        if (guess > pNormStackA)
-            fprintf('Matrix Nrom inequality violated \n');
-            break;
-        end
-    
-        if abs(guess - pNormStackA) <=err_a || abs(oldGuess - guess) <= err_a
-            break;
-        end
-    
-        diagonalStackB = diagonalStackB +  step .* gradient;
-    
-        oldGuess = guess;
-      
-    
-    
-    end
+    [pNormStackA, ~] = pPower(stackA, p, err_a, 25);
 
-    if p == 2
-            diff = pNormStackA - guess
 
-            if diff < 0
-                fprintf('\n  Something went all Fucky-Whucky \n')
+    v = zeros(dim1, 1); %#ok<PREALL>
+
+    for guessLoop=1:sMax
+            
+        
+        diagonalStackB = complex(randn(dim2, dim1), randn(dim2, dim1));
+        
+        
+        
+        w = complex(randn(dim1, 1), randn(dim1, 1));
+        
+        
+        
+        pNormBA = 0; %#ok<NASGU>
+        
+        oldGuess = 0;
+        vMax = zeros(dim1 * dim2, 1);
+        
+        
+        while (true)
+            for i=0:dim2 - 1
+        
+                stackB(:, ((i  * dim1) + 1):((i+1) * dim1)) = matrixU *  diag(diagonalStackB(i + 1, :)) * matrixUinv;
             end
+            [normStackB, vMax] = pPower(stackB, p, err_a, 25, vMax);
+            diagonalStackB = diagonalStackB ./ normStackB;
+            diagSum = sum((diagonalStackA .* diagonalStackB), 1);
+        
+            vDual = ((w' * matrixU) .* diagSum) * matrixUinv;
+            v = dual(vDual, q).';
+            % vNorm = vectorPNorm(v.', p);
+            wDual =  matrixU * (diagSum.' .* (matrixUinv * v));
+            w = dual(wDual, p);
+            % wNorm = vectorPNorm(w, q);
+            wPrime_U = w' * matrixU;
+            matrixUinv_v = matrixUinv * v;
+        
+            guess = wPrime_U * (diagSum.' .* matrixUinv_v);
+            guess = abs(guess);
+            gradient = zeros(dim2, dim1);
+        
+            for i=1:dim2
+        
+                gradient(i, :) = (wPrime_U) .* diagonalStackA(i,:) .* (matrixUinv_v).';
+            end
+        
+            if (guess > pNormStackA + errorScale * err_a)
+                fprintf('Matrix Nrom inequality violated \n');
+                fprintf('  diff = %d \n', pNormStackA - guess);
+                break;
+            end
+        
+            if abs(guess - pNormStackA) <=err_a || (guess - oldGuess) <= err_a
+                break;
+            end
+        
+            diagonalStackB = diagonalStackB +  step .* gradient;
+        
+            oldGuess = guess;
+        
+        
+        
+        end
+
+        result = max(result, guess);
+
     end
+    % pNormStackA;
+    diff = pNormStackA - result; %#ok<NOPRT>
+
+    if diff < - errorScale * err_a
+        fprintf('\n  Something went all Fucky-Whucky \n')
+    end
+        
 
 end

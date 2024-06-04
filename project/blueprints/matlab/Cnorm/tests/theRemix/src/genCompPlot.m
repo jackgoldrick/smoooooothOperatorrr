@@ -22,7 +22,7 @@
         %% 'dr' - step size of the value of R                                                                              %%
     %%                                                                                                                         %%
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
-function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
+function genCompPlot(type, N, dp, pMax, sMax, gp, pq, rv, dr, invertableMatrix)
     %% Test Matricies (type)
       % 'a' - 2x4 of 1s on the Diagnol 
       % 'b' - 
@@ -42,9 +42,9 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
       % 'p' - 4x2 trasnpose of case 'a'
       % 'q' - 
       % 'r' - MxN Random (Normal Distribution) Real Matrix
-      % 's' - 4x2 Wilson's example with 3, 1, -1 on diagnols and off diagnols
+      % 's' - Simultanious Diagnolizable Stacks
       % 't' - 
-      % 'u' - 
+      % 'u' - user defined
       % 'v' -
 
     switch type
@@ -95,17 +95,23 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
 
         case 'r'
             if (length(N) - 1) %#ok<BDLOG>
-                cMatrix = rand(N(1), N(2));
+                cMatrix = randn(N(1), N(2));
 
             else
                 cMatrix = randn(N, N);
             end
         
         case 's'
-            cMatrix = [ 3  1; 
-                        1  3; 
-                        3 -1;
-                        -1 3];
+            if isempty(N) %#ok<BDLOG>
+                cMatrix = [2 1; 1 2];
+                N = 2;
+            elseif (length(N) - 1) %#ok<BDLOG>
+                cMatrix = complex(randn(N(1), N(2)), randn(N(1), N(2)));
+
+            else 
+                 cMatrix = complex(randn(N, N), randn(N, N));
+            end
+           
 
     end
 
@@ -174,10 +180,13 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
         elseif pq == 'q'
             [norms(j), ~] = pqPower(cMatrix, p(j), r, .000000001, sMax);
         else
-            % [norms(j), ~] = pPower(cMatrix, p(j), .0000001, sMax);
-            [norms(j), vMax] = pPower(cMatrix, p(j), .000000001, sMax, vMax2);
-            vMax2 = vMax;
-            
+            if type == 's'
+
+            else
+
+                [norms(j), vMax] = pPower(cMatrix, p(j), .000000001, sMax, vMax2);
+                vMax2 = vMax;
+            end 
         end
     end
     fprintf('Done! \n');
@@ -201,15 +210,34 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
                 correctNormsP(j) = 2 ^ (1 / p(j));
             end
 
-        elseif p(j) <= 2 && type == 'm'
+        elseif type == 'm'
             for j = 1:sizeP
-                correctNorms(j) = ((1 + 2 ^(p(j) - 1)) ^ (1/(p(j)))) / sqrt(3);
+                if p(j) <= 2 
+                    correctNorms(j) = ((1 + 2 ^(p(j) - 1)) ^ (1/(p(j)))) / sqrt(3);
+                else
+                    q = 1 / (1 - 1 / p(j));
+                    correctNorms(j) = ((1 + 2 ^(q - 1)) ^ (1/(q))) / sqrt(3);
+                end
             end
 
-        elseif p(j) > 2 && type == 'm'
-            for j = 1:sizeP
-                q = 1 / (1 - 1 / p(j));
-                correctNorms(j) = ((1 + 2 ^(q - 1)) ^ (1/(q))) / sqrt(3);
+        elseif type == 's'
+            if nargin == 10
+                for j = 1:sizeP
+                    [norms(j), correctNorms(j)] = maxSimDiag(cMatrix, invertableMatrix , p(j), 1e-2, sMax, 1e-7);
+                end 
+            else 
+
+                if (length(N) - 1) %#ok<BDLOG>
+
+                    N = N(2);
+                end 
+
+            
+                for j = 1:sizeP
+
+                    [norms(j), correctNorms(j)] = maxSimDiag(cMatrix, hadamard(N) ./ sqrt(N), p(j), 1e-2, sMax, 1e-7);
+                end 
+
             end
         end 
         
@@ -220,7 +248,7 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
     if gp == 'y'
         plotTime = tic;
         fprintf('\nPlotting P->P...')
-        figure1 = figure;
+        figure1 = figure; %#ok<NASGU>
             hold on
                 xlabel("p");
                 ylabel("Operator Norm Value");
@@ -240,6 +268,10 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
                     plot(p, norms, '-b', 'LineWidth', 1);
                     plot(p, 1, '-r');
                     legend("Our Method", "Lower Bound");
+                elseif type == 's' 
+                    plot(p, norms, '-b', 'LineWidth', 1);
+                    plot(p, correctNorms, '-r');
+                    legend("Gradient Algorithm", "pPower Algorithm");
                 else 
                     plot(p, norms, '-b', 'LineWidth', 1);
                     plot(p, correctNorms, '-r');
@@ -250,7 +282,6 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
         toc(plotTime)
     end
     
-    figure
     % 1 -> k
     % 2 -> wn
     % 3 -> eta
@@ -270,7 +301,7 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr)
         surfPlotTime = tic;
         fprintf('\nPlotting P->R Surface... \n');
         
-        figure2 = figure;
+        figure2 = figure; %#ok<NASGU>
             hold on
                 xlabel("r");
                 ylabel("p");

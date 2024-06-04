@@ -16,9 +16,12 @@
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
 function [res, vMax] = pPower(cMatrix, p, err_a, sMax, vMax3)
 
+colSize = length(cMatrix(1,:));
+
 if p == 1
-    [res, ~] = p1(cMatrix);
-    vMax = [];
+    [res, index] = p1(cMatrix);
+    vMax = zeros(colSize, 1);
+    vMax(index, 1) = 1;
     return
 end
 
@@ -32,7 +35,7 @@ res = 0; %#ok<NASGU>
 
 
 
-colSize = length(cMatrix(1,:));
+
 
 
 
@@ -83,7 +86,7 @@ while (true)
 
     if isnan(guess)
         fprintf("Floating Point Error \n")
-        vMax = 0 .* y;
+        vMax = [];
         res = 0;
         return
     end 
