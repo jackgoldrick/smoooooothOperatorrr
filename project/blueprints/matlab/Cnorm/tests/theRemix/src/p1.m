@@ -1,10 +1,10 @@
 function [res, ind] = p1(matrix)
-    oneVector = ones(1,length(matrix(:,1)));
-    % modMatrix = sqrt((real(cMatrix)) .^ 2 + (imag(cMatrix)) .^ 2);
-    % on avg saves a bit of time compared to above line
-    modMatrix = abs(matrix);
-    normColumn =  oneVector * modMatrix;
 
-    [res, ind] = max(normColumn);
+    modMatrix = abs(matrix);
+    normColumn =  sum(modMatrix, 1);
+
+    [res, ind] = max(normColumn,[], 2);
+
+    ind
 
 end 

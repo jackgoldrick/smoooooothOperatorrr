@@ -17,15 +17,23 @@
 function [res, vMax] = pPower(cMatrix, p, err_a, sMax, vMax3)
 
 colSize = length(cMatrix(1,:));
+dims = size(cMatrix);
+if length(dims) == 3
+    pageDim = dims(3);
+
+else
+    pageDim = 1;
+
+end 
 
 if p == 1
     [res, index] = p1(cMatrix);
-    vMax = zeros(colSize, 1);
-    vMax(index, 1) = 1;
+    vMax = zeros(colSize, 1, pageDim);
+    vMax(index == 1:colSize) = 1;
     return
 end
 
-cMatrixPrime = cMatrix';
+cMatrixPrime = pagectranspose(cMatrix);
 
 
 q = 1 / (1 - 1/p);
@@ -41,16 +49,16 @@ res = 0; %#ok<NASGU>
 
 if nargin == 5
     if isempty(vMax3)
-        x = randn(colSize, sMax,"like",1i);
+        x = randn(colSize, sMax, pageDim, "like",1i);
     else
-        f = randn(colSize, sMax,"like",1i);
+        f = randn(colSize, sMax, pageDim, "like",1i);
         x = [f,vMax3];
         clear f
     end
 
 else 
 
-    x = randn(colSize, sMax,"like",1i);
+    x = randn(colSize, sMax, pageDim, "like",1i);
 
 end
 
@@ -62,11 +70,10 @@ oldGuess = 0;
 
 while (true)
     
-    y = cMatrix * x;
+    y = pagemtimes(cMatrix, x);
     
-    yDual = (abs(y).^ (p-1)) .* (sign(y));
+    yDual = dual(y, p);
     
-    yDual =  yDual ./ vectorPNorm(yDual, q);
     
 
    [guess, index] = max(vectorPNorm(y, p));
@@ -77,11 +84,9 @@ while (true)
         break;
     end
 
-    z = cMatrixPrime * yDual;
-    zDual = (abs(z).^ (q-1)) .* (sign(z));
-    zDual =  zDual ./ vectorPNorm(zDual, p);
-
-    x = zDual;
+    z = pagemtimes(cMatrixPrime, yDual);
+    
+    x = dual(z, q);
     oldGuess = guess;
 
     if isnan(guess)

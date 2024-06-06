@@ -267,6 +267,7 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr, ipp)
             hold off
             if ipp == 2
                 plot(p, norms2-norms, '-g', 'LineWidth', 1);
+            end
         fprintf("Done! \n");
         toc(plotTime)
     end
