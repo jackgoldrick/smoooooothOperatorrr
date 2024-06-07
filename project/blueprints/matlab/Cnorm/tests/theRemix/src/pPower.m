@@ -53,6 +53,7 @@ if nargin == 5
     else
         f = randn(colSize, sMax, pageDim, "like",1i);
         x = [f,vMax3];
+        sMax= sMax + 1;
         clear f
     end
 

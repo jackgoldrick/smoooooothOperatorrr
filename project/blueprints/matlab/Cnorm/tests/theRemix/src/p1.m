@@ -5,6 +5,6 @@ function [res, ind] = p1(matrix)
 
     [res, ind] = max(normColumn,[], 2);
 
-    ind
+  
 
 end 

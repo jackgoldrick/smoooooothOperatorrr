@@ -2,7 +2,7 @@
     %%                                                                                                                         %%
         %% Author: @jackgoldrick                                                                                           %%
         %% Repository: https://github.com/jackgoldrick/smoooooothOperatorrr                                                %%
-        %%                                                                                                                 %%
+        %% Tensor Networks                                                                                                 %%
         %%                                                                                                                 %%
         %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%                                                                                            
         %% 'N' - size of NxN matrix. If N is a vector, then for any MxN matrix, N := [M N];                                %%
@@ -22,7 +22,7 @@
         %% 'dr' - step size of the value of R                                                                              %%
     %%                                                                                                                         %%
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
-function genCompPlot(type, N, dp, pMax, sMax, gp, pq, rv, dr, invertableMatrix)
+function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
     %% Test Matricies (type)
       % 'a' - 2x4 of 1s on the Diagnol 
       % 'b' - 
@@ -223,7 +223,7 @@ function genCompPlot(type, N, dp, pMax, sMax, gp, pq, rv, dr, invertableMatrix)
         elseif type == 's'
             if nargin == 10
                 for j = 1:sizeP
-                    [norms(j), correctNorms(j)] = maxSimDiag(cMatrix, invertableMatrix , p(j), 1e-2, sMax, 1e-7);
+                    [norms(j), correctNorms(j)] = maxSimDiag(cMatrix, invertableMatrix , p(j), 1e-1, sMax, 1e-7);
                 end 
             else 
 
@@ -235,7 +235,7 @@ function genCompPlot(type, N, dp, pMax, sMax, gp, pq, rv, dr, invertableMatrix)
             
                 for j = 1:sizeP
 
-                    [norms(j), correctNorms(j)] = maxSimDiag(cMatrix, hadamard(N) ./ sqrt(N), p(j), 1e-2, sMax, 1e-7);
+                    [norms(j), correctNorms(j)] = maxSimDiag(cMatrix, hadamard(N) ./ sqrt(N), p(j), 1e-1, sMax, 1e-7);
                 end 
 
             end
