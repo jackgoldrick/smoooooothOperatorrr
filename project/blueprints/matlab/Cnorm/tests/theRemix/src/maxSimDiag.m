@@ -8,7 +8,7 @@
         %% 'N' - size of NxN matrix. If N is a vector, then for any MxN matrix, N := [M N];                                %%
         %% 'dp' - step size of the value of P                                                                              %%
         %% 'pMax' - max value of P to compute                                                                              %%
-        %% 'sMax' - The number of random guess vectors used to compute each P->P or P->R                                   %%
+        %% 'sMaxDiag' - The number of random guess vectors used to compute each P->P or P->R                                   %%
         %% 'type' - The type of matrix to compute                                                                          %%
         %% 'gp' - Graphs the P->P depending on this flag                                                                   %%
         %%     'y' - yes P->P Graph                                                                                        %%
@@ -23,15 +23,15 @@
     %%                                                                                                                         %%
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
 
-function [result, pNormStackA] = maxSimDiag(diagonalStackA, matrixU, p, step, sMax, err_a)
+function [result, pNormStackA] = maxSimDiag(diagonalStackA, matrixU, p, step, sMaxDiag, err_a)
     dim1 = length(matrixU(1,:));
     dim2 = length(diagonalStackA(:,1));
     errorScale = 100;
     result = 0;
     q = 1 / (1 - 1/p);
-    
+    sMaxPower = 25;
     stackA = zeros(dim1 *dim2, dim1);
-    stackB = zeros(dim1, dim1 * dim2, sMax);
+    stackB = zeros(dim1, dim1 * dim2, sMaxDiag);
     matrixUinv = inv(matrixU);
 
     for i=0:dim2 - 1
@@ -41,35 +41,35 @@ function [result, pNormStackA] = maxSimDiag(diagonalStackA, matrixU, p, step, sM
     
     
     
-    [pNormStackA, ~] = pPower(stackA, p, err_a, 25);
+    [pNormStackA, ~] = pPower(stackA, p, err_a, sMaxPower);
 
 
-    v = zeros(dim1, 1, sMax); %#ok<PREALL>
+    v = zeros(dim1, 1, sMaxDiag); %#ok<PREALL>
 
 
         
     
-    diagonalStackB = complex(randn(dim2, 1, dim1, sMax), randn(dim2, 1, dim1, sMax));
+    diagonalStackB = complex(randn(dim2, 1, dim1, sMaxDiag), randn(dim2, 1, dim1, sMaxDiag));
     
     
     
-    w = complex(randn(dim1, 1, sMax), randn(dim1, 1,sMax));
+    w = complex(randn(dim1, 1, sMaxDiag), randn(dim1, 1,sMaxDiag));
     
     
     
     pNormBA = 0; %#ok<NASGU>
     
     oldGuess = 0;
-    vMax = zeros(dim1 * dim2, sMax);
+    vMax = zeros(dim1 * dim2, sMaxDiag);
     
     
     while (true)
         
     
         stackB = pagemtimes(matrixU,  diagonalStackB .* matrixUinv);
-        stackB = reshape(stackB, dim2 * dim1, dim1, sMax);
+        stackB = reshape(stackB, dim2 * dim1, dim1, sMaxDiag);
          
-        [normStackB, vMax] = pPower(stackB, p, err_a, 25, vMax);
+        [normStackB, vMax] = pPower(stackB, p, err_a, sMaxPower, vMax);
         diagonalStackB = diagonalStackB ./ normStackB;
         diagSum = sum((diagonalStackA .* diagonalStackB), 1);
     

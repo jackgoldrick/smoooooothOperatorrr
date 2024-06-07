@@ -16,8 +16,8 @@
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
 function [res, vMax] = pPower(cMatrix, p, err_a, sMax, vMax3)
 
-colSize = length(cMatrix(1,:));
 dims = size(cMatrix);
+colSize = dims(2);
 if length(dims) == 3
     pageDim = dims(3);
 
@@ -76,11 +76,12 @@ while (true)
     
     
 
-   [guess, index] = max(vectorPNorm(y, p));
+   [guess, index] = max(vectorPNorm(y, p), [], 2);
     
     
-    if abs(guess - oldGuess) < err_a
-        vMax = x(:, index);
+    if max(abs(guess - oldGuess)) < err_a
+
+        vMax(:, 1, :) = x(:, index == 1:sMax);
         break;
     end
 
