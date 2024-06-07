@@ -223,7 +223,7 @@ function genCompPlot(type, N, dp, pMax, sMax, gp, pq, rv, dr, invertableMatrix)
         elseif type == 's'
             if nargin == 10
                 for j = 1:sizeP
-                    [norms(j), correctNorms(j)] = maxSimDiag(cMatrix, invertableMatrix , p(j), 1e-2, sMax, 1e-7);
+                    [norms(j), correctNorms(j)] = maxSimDiag(cMatrix, invertableMatrix , p(j), 1e-1, sMax, 1e-7);
                 end 
             else 
 
@@ -235,13 +235,13 @@ function genCompPlot(type, N, dp, pMax, sMax, gp, pq, rv, dr, invertableMatrix)
             
                 for j = 1:sizeP
 
-                    [norms(j), correctNorms(j)] = maxSimDiag(cMatrix, hadamard(N) ./ sqrt(N), p(j), 1e-2, sMax, 1e-7);
+                    [norms(j), correctNorms(j)] = maxSimDiag(cMatrix, hadamard(N) ./ sqrt(N), p(j), 1e-1, sMax, 1e-7);
                 end 
 
             end
         end 
         
-        fprintf("Done! \n");
+        fprintf("Done! \n"); % genCompPlot('s', [], .1, 5, 100, 'y','p', 0,0, hadamard(2) ./ sqrt(2))
     end
     
     %% P->P Plotting from gp flag
