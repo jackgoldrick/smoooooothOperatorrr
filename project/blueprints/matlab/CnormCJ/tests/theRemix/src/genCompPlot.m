@@ -109,7 +109,7 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr, ipp)
     end
 
     programTime = tic;
-    p = 1:dp:pMax;
+    p = generatePValues(1:dp:pMax);
     sizeP = length(p);
 
     if pq == 'g'
@@ -267,7 +267,6 @@ function genCompPlot(N, dp, pMax, sMax, type, gp, pq, rv, dr, ipp)
             hold off
             if ipp == 2
                 plot(p, norms2-norms, '-g', 'LineWidth', 1);
-            end
         fprintf("Done! \n");
         toc(plotTime)
     end
