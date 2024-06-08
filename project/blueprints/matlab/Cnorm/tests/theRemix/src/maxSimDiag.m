@@ -82,10 +82,10 @@ while (true)
     % diagSum = reshape(sum((diagonalStackA .* diagonalStackB), 3), dim1, 1, sMaxDiag);
     diagSum = sum((diagonalStackA .* diagonalStackB), 3);
     vDual = pagemtimes((pagemtimes(pagectranspose(w), matrixU) .* pagetranspose(diagSum)), matrixUinv);
-    v = dual(pagetranspose(vDual), q);
+    v = dual(pagectranspose(vDual), q);
     % vNorm = vectorPNorm(v.', p);
     wDual =  pagemtimes(matrixU, diagSum .* pagemtimes(matrixUinv, v));
-    w = conj(dual(wDual, p));
+    w = dual(wDual, p);
     % wNorm = vectorPNorm(w, q);
     wPrime_U = pagemtimes(pagectranspose(w), matrixU);
     matrixUinv_v = pagemtimes(matrixUinv, v);
@@ -97,7 +97,9 @@ while (true)
     maxGuess = max(guess, [], "all");
     if (maxGuess > pNormStackA + errorScale * err_a)
         fprintf('Matrix Nrom inequality violated \n');
-        fprintf('  diff = %d \n', pNormStackA - guess);
+        pNormStackA
+        guess
+        %fprintf('  diff = %d \n', pNormStackA - guess);
         break;
     end
         
@@ -119,8 +121,7 @@ end
 result = maxGuess;
 
 % pNormStackA;
-diff = pNormStackA - result; %#ok<NOPRT>
-
+diff = pNormStackA - result; %#ok<NOPRT>E
 
 if min(diff,[],"all") < - errorScale * err_a
     fprintf('\n  Something went all Fucky-Whucky \n')

@@ -74,11 +74,8 @@ while (true)
     y = pagemtimes(cMatrix, x);
     
     yDual = dual(y, p);
-    
-    
 
-   [guess, index] = max(vectorPNorm(y, p), [], 2);
-    
+    [guess, index] = max(vectorPNorm(y, p), [], 2);    
     
     if max(abs(guess - oldGuess)) < err_a
 
