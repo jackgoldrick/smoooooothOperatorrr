@@ -54,9 +54,9 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
 
         case 'c'
             if (length(N) - 1) %#ok<BDLOG>
-                cMatrix = complex(randn(N(1), N(2)), randn(N(1),N(2)));
+                cMatrix = complex(randn(N(1), N(2),'gpuArray'), randn(N(1),N(2),'gpuArray'));
             else
-                cMatrix = complex(randn(N, N), randn(N,N));
+                cMatrix = complex(randn(N, N,'gpuArray'), randn(N,N,'gpuArray'));
             end
 
         case 'd'
@@ -95,10 +95,10 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
 
         case 'r'
             if (length(N) - 1) %#ok<BDLOG>
-                cMatrix = randn(N(1), N(2));
+                cMatrix = randn(N(1), N(2),'gpuArray');
 
             else
-                cMatrix = randn(N, N);
+                cMatrix = randn(N, N, 'gpuArray');
             end
         
         case 's'
@@ -106,10 +106,10 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
                 cMatrix = [2 1; 1 2];
                 N = 2;
             elseif (length(N) - 1) %#ok<BDLOG>
-                cMatrix = complex(randn(N(1), N(2)), randn(N(1), N(2)));
+                cMatrix = complex(randn(N(1), N(2),'gpuArray'), randn(N(1), N(2),'gpuArray'));
 
             else 
-                 cMatrix = complex(randn(N, N), randn(N, N));
+                 cMatrix = complex(randn(N, N,'gpuArray'), randn(N, N,'gpuArray'));
             end
            
 

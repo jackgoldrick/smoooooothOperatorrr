@@ -28,7 +28,7 @@ end
 
 if p == 1
     [res, index] = p1(cMatrix);
-    vMax = zeros(colSize, 1, pageDim);
+    vMax = zeros(colSize, 1, pageDim, 'gpuArray');
     vMax(index == 1:colSize) = 1;
     return
 end
@@ -49,9 +49,9 @@ res = 0; %#ok<NASGU>
 
 if nargin == 5
     if isempty(vMax3)
-        x = randn(colSize, sMax, pageDim, "like",1i);
+        x = randn(colSize, sMax, pageDim, "like",1i,'gpuArray');
     else
-        f = randn(colSize, sMax, pageDim, "like",1i);
+        f = randn(colSize, sMax, pageDim, "like",1i,'gpuArray');
         x = [f,vMax3];
         sMax= sMax + 1;
         clear f
@@ -59,7 +59,7 @@ if nargin == 5
 
 else 
 
-    x = randn(colSize, sMax, pageDim, "like",1i);
+    x = randn(colSize, sMax, pageDim, "like",1i,'gpuArray');
 
 end
 
@@ -99,6 +99,6 @@ while (true)
     end 
 end
 
-res = guess;
+res = gpuArray(guess);
 
 end 

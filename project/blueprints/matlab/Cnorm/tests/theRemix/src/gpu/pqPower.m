@@ -27,7 +27,7 @@ if p == 1
 end
 
 colSize = length(cMatrix(1,:));
-vMax = zeros(colSize, 1);
+vMax = zeros(colSize, 1,'gpuArray');
 cMatrixPrime = cMatrix';
 
 q = 1 / (1 - 1/p);
@@ -39,16 +39,16 @@ res = 0; %#ok<NASGU>
 
 if nargin == 6
     if isempty(vMax4)
-        x = randn(colSize, sMax,"like",1i);
+        x = randn(colSize, sMax,"like",1i,'gpuArray');
     else
-        f = randn(colSize, sMax,"like",1i);
+        f = randn(colSize, sMax,"like",1i,'gpuArray');
         x = [f,vMax4];
         clear f
     end
 
 else 
 
-    x = randn(colSize, sMax,"like",1i);
+    x = randn(colSize, sMax,"like",1i,'gpuArray');
 
 end
 
