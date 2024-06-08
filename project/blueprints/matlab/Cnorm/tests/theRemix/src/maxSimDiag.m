@@ -28,6 +28,7 @@ dims = size(diagonalStackA);
 dim1 = dims(2);
 dim2 = dims(1);
 matrixUinv = inv(matrixU);
+step = step * ones(1,1,1,sMaxDiag);
 diagonalStackA = reshape(diagonalStackA.', dim1, 1, dim2);
 
 vMax = zeros(dim1 * dim2, 1, sMaxDiag);
@@ -84,7 +85,7 @@ while (true)
     v = dual(pagetranspose(vDual), q);
     % vNorm = vectorPNorm(v.', p);
     wDual =  pagemtimes(matrixU, diagSum .* pagemtimes(matrixUinv, v));
-    w = dual(wDual, p);
+    w = conj(dual(wDual, p));
     % wNorm = vectorPNorm(w, q);
     wPrime_U = pagemtimes(pagectranspose(w), matrixU);
     matrixUinv_v = pagemtimes(matrixUinv, v);
@@ -99,12 +100,13 @@ while (true)
         fprintf('  diff = %d \n', pNormStackA - guess);
         break;
     end
-
-    if abs(maxGuess - pNormStackA) <=err_a || max(guess - oldGuess, [], "all") <= err_a
-    %if max(guess - oldGuess, [], "all") <= err_a
+        
+    if abs(maxGuess - pNormStackA) <=err_a || max(guess - oldGuess, [], "all") <= err_a    
         break;
     end
 
+    converged = abs(guess - pNormStackA) <=err_a | guess - oldGuess <= err_a;
+    step(converged) = 0;
     diagonalStackB = diagonalStackB +  step .* gradient;
 
     oldGuess = guess;

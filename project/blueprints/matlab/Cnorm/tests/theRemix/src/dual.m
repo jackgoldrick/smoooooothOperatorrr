@@ -14,8 +14,9 @@ function yDual = dual(y, p)
         return
     elseif isinf(p) || isnan(p)
         yDual = 0 .* y;
-        [val,ind] = max(y);
-        yDual(ind) = conj(sign(val));
+        [val,ind] = max(y, [], 1);
+        loc = size(y);
+        yDual(1:loc(1) == ind) = conj(sign(val));
         return
     end 
     q = 1 / (1 - 1/p);
