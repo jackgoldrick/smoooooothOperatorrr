@@ -28,6 +28,7 @@ dims = size(diagonalStackA);
 dim1 = dims(2);
 dim2 = dims(1);
 matrixUinv = inv(matrixU);
+step = step * ones(1,1,1,sMaxDiag);
 diagonalStackA = reshape(diagonalStackA.', dim1, 1, dim2);
 
 vMax = zeros(dim1 * dim2, 1, sMaxDiag);
@@ -45,7 +46,7 @@ stackB = zeros(dim1, dim1 * dim2, sMaxDiag);
 
 
 stackA = pagemtimes(matrixU, diagonalStackA .* matrixUinv);
-stackA = reshape(stackA, dim2 * dim1, dim1, 1);
+stackA = reshape(permute(stackA, [1 3 2]), dim2 * dim1, dim1, 1);
 
 
 
@@ -69,19 +70,23 @@ pNormBA = 0; %#ok<NASGU>
 
 oldGuess = 0;
 
+converged = logical(zeros(1, 1, 1, sMaxDiag));
+
 
 while (true)
 
     % reshape(matrixUinv,1, dim1, dim1,1)
     stackB = pagemtimes(matrixU, diagonalStackB .* matrixUinv);
     stackB = reshape(stackB, dim1, dim2 * dim1, sMaxDiag);
-
-    [normStackB, vMax] = pPower(stackB, p, err_a, sMaxPower, vMax);
+    
+    flatConverged = reshape(converged, 1, []).';
+    normStackB = ones(1, 1, sMaxDiag);
+    [normStackB(:,:,~flatConverged), vMax(:,:,~flatConverged)] = pPower(stackB(:,:,~flatConverged), p, err_a, sMaxPower, vMax(:,:,~flatConverged));
     diagonalStackB = diagonalStackB ./ reshape(normStackB, 1, 1, 1, sMaxDiag);
     % diagSum = reshape(sum((diagonalStackA .* diagonalStackB), 3), dim1, 1, sMaxDiag);
     diagSum = sum((diagonalStackA .* diagonalStackB), 3);
     vDual = pagemtimes((pagemtimes(pagectranspose(w), matrixU) .* pagetranspose(diagSum)), matrixUinv);
-    v = dual(pagetranspose(vDual), q);
+    v = dual(pagectranspose(vDual), q);
     % vNorm = vectorPNorm(v.', p);
     wDual =  pagemtimes(matrixU, diagSum .* pagemtimes(matrixUinv, v));
     w = dual(wDual, p);
@@ -92,19 +97,24 @@ while (true)
     guess = pagemtimes(wPrime_U, (diagSum .* matrixUinv_v));
     guess = abs(guess);
 
-    gradient = pagetranspose(wPrime_U) .* diagonalStackA .*  (matrixUinv_v);
     maxGuess = max(guess, [], "all");
     if (maxGuess > pNormStackA + errorScale * err_a)
         fprintf('Matrix Nrom inequality violated \n');
-        fprintf('  diff = %d \n', pNormStackA - guess);
+        pNormStackA
+        guess
+        %fprintf('  diff = %d \n', pNormStackA - guess);
         break;
     end
 
-    %if abs(maxGuess - pNormStackA) <=err_a || max(guess - oldGuess, [], "all") <= err_a
-    if max(guess - oldGuess, [], "all") <= err_a
+    converged = converged | abs(guess - pNormStackA) <= err_a | guess - oldGuess <= err_a;
+
+    %if sum(converged) > 0.7 * sMaxDiag
+    %if all(converged)
         break;
     end
 
+    gradient = pagetranspose(wPrime_U) .* diagonalStackA .* (matrixUinv_v);
+    step(converged) = 0;
     diagonalStackB = diagonalStackB +  step .* gradient;
 
     oldGuess = guess;
@@ -117,8 +127,7 @@ end
 result = maxGuess;
 
 % pNormStackA;
-diff = pNormStackA - result; %#ok<NOPRT>
-
+diff = pNormStackA - result; %#ok<NOPRT>E
 
 if min(diff,[],"all") < - errorScale * err_a
     fprintf('\n  Something went all Fucky-Whucky \n')
