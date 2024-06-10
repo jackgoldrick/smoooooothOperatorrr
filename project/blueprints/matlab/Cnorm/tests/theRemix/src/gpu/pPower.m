@@ -49,17 +49,17 @@ res = 0; %#ok<NASGU>
 
 if nargin == 5
     if isempty(vMax3)
-        x = randn(colSize, sMax, pageDim, "like",1i,'gpuArray');
+        x = gpuArray(randn(colSize, sMax, pageDim, "like",1i));
     else
-        f = randn(colSize, sMax, pageDim, "like",1i,'gpuArray');
-        x = [f,vMax3];
+        f = gpuArray(randn(colSize, sMax, pageDim, "like",1i));
+        x = gpuArray([f,vMax3]);
         sMax= sMax + 1;
         clear f
     end
 
 else 
 
-    x = randn(colSize, sMax, pageDim, "like",1i,'gpuArray');
+    x = gpuArray(randn(colSize, sMax, pageDim, "like",1i));
 
 end
 

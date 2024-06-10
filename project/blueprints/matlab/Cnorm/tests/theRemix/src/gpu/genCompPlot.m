@@ -195,6 +195,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
     
         
     if gp == 'y'
+        valTime = tic;
         fprintf('\nCollecting Exact Values... ')
         if type == 'h'
             for j = 1:sizeP
@@ -241,6 +242,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
         end 
         
         fprintf("Done! \n");
+        toc(valTime)
     end
     
     %% P->P Plotting from gp flag
