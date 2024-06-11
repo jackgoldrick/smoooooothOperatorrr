@@ -23,7 +23,7 @@
 %%                                                                                                                         %%
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
 
-function [result, pNormStackA] = maxSimDiag(diagonalStackA, matrixU, p, step, sMaxDiag, err_a)
+function [result, pNormStackA] = maxSimDiag_2(diagonalStackA, matrixU, p, step, sMaxDiag, err_a)
 dims = size(diagonalStackA);
 dim1 = dims(2);
 dim2 = dims(1);
@@ -31,7 +31,7 @@ dim2 = dims(1);
 %matrixU = gpuArray(matrixU);
 %matrixUinv = gpuArray(inv(matrixU));
 matrixUinv = inv(matrixU);
-step = step * ones(1,1,1,sMaxDiag, 'gpuArray');
+step = step * ones(1,1,1,sMaxDiag);
 diagonalStackA = reshape(diagonalStackA.', dim1, 1, dim2);
 
 vMax = zeros(dim1 * dim2, 1, sMaxDiag, 'gpuArray');
