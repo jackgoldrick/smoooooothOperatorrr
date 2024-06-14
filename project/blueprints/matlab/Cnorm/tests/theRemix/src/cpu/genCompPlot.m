@@ -22,7 +22,7 @@
         %% 'dr' - step size of the value of R                                                                              %%
     %%                                                                                                                         %%
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
-function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
+function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, cord)
     %% Test Matricies (type)
       % 'a' - 2x4 of 1s on the Diagnol 
       % 'b' - 
@@ -166,6 +166,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
 
     end 
     vMax2 = zeros(length(cMatrix(1,:)), 1);
+    vs = zeros (length(cMatrix(1,:)), 1, sizeP);
     for j = 1:sizeP    
         if pq == 'g'
             for k = 1:sizeR
@@ -186,6 +187,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
 
                 [norms(j), vMax] = pPower(cMatrix, p(j), .000000001, sMax, vMax2);
                 vMax2 = vMax;
+                vs(:,1, j) = vMax; 
             end 
         end
     end
@@ -314,6 +316,119 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
         fprintf("Done! \n ");
         toc(surfPlotTime)
     end
+
+
+    if cord == 'y'
+        x(1,:) = abs(vs(1, 1, :));
+        y(1, :) = abs(vs(2, 1, :));
+        size(x)
+        figure3 = figure;
+            hold on
+                xlabel("x-cord");
+                ylabel("y-cord");
+                title("maximizing coords: abs");
+                plot(x, y);
+                legend("Our Method"); 
+            hold off 
+
+        xRe(1,:) = real(vs(1, 1, :));
+        xIm(1,:) = imag(vs(1, 1, :));
+
+        yRe(1,:) = real(vs(2, 1, :));
+        yIm(1, :) = imag(vs(2, 1, :));
+        figure4 = figure;
+            hold on
+                tiledlayout(2,1)
+
+                ax1 = nexttile;
+                plot(ax1, xRe, xIm);
+                xlabel(ax1, "Re(x-cord)");
+                ylabel(ax1, "Im(x-cord)");
+                title(ax1, "maximizing x-cords: im vs re");
+                
+
+                ax2 = nexttile;
+                plot(ax2, yRe, yIm);
+                xlabel(ax2, "Re(y-cord)");
+                ylabel(ax2, "Im(y-cord)");
+                title(ax2, "maximizing y-cords: im vs re");
+                
+            hold off 
+
+            figure5 = figure;
+            hold on
+                tiledlayout(2,1)
+
+                ax1 = nexttile;
+                plot(ax1, xRe,yRe);
+                xlabel(ax1, "Re(x-cord)");
+                ylabel(ax1, "Re(y-cord)");
+                title(ax1, "maximizing real-cords: y v x");
+                
+
+                ax2 = nexttile;
+                plot(ax2, xIm, yIm);
+                xlabel(ax2, "Im(x-cord)");
+                ylabel(ax2, "Im(y-cord)");
+                title(ax2, "maximizing imag-cords: y v x");
+                
+            hold off 
+
+        figure6 = figure;
+            hold on
+                xlabel("abs(x-cord)");
+                ylabel("abs(y-cord)");
+                zlabel("p-value");
+                title("maximizing coords: abs");
+                plot3(x, y, p);
+        
+            hold off 
+
+        figure7 = figure;
+            hold on
+                xlabel("abs(x-cord)");
+                ylabel("abs(y-cord)");
+                zlabel("p-value");
+                title("3D maximizing coords: abs");
+                plot3(x, y, p);
+            hold off
+
+        figure8 = figure;
+            hold on
+                xlabel("Re(x-cord)");
+                ylabel("Re(y-cord)");
+                zlabel("p-value");
+                title("3D maximizing coords: Re");
+                plot3(xRe, yRe, p);
+            hold off
+
+        figure9 = figure;
+            hold on
+                xlabel("Im(x-cord)");
+                ylabel("Im(y-cord)");
+                zlabel("p-value");
+                title("3D maximizing coords: Im");
+                plot3(xIm, yIm, p);
+            hold off
+
+        figure10 = figure;
+        hold on
+            xlabel("Re(x-cord)");
+            ylabel("Im(x-cord)");
+            zlabel("p-value");
+            title("3D maximizing coords: x Re vs Im");
+            plot3(xRe, xIm, p);
+        hold off
+
+        figure11 = figure;
+        hold on
+            xlabel("Re(y-cord)");
+            ylabel("Im(y-cord)");
+            zlabel("p-value");
+            title("3D maximizing coords: y Re vs Im");
+            plot3(yRe, yIm, p);`1
+        hold off
+    end 
     
     fprintf('\nProgram Runtime:\n');
     toc(programTime)

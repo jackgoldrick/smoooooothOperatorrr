@@ -3,6 +3,7 @@ import numpy as np
 device = tc.device('cuda' if tc.cuda.is_available() else 'cpu')
 tc.set_grad_enabled(False)
 print(f'Using device: {device}')
+
 def dual(y, p, dim):
     '''
     Returns the Holder p-dual of y along dimension dim
@@ -10,7 +11,7 @@ def dual(y, p, dim):
     if p == 1:
         return y.sgn()
     elif np.isinf(p) or np.isnan(p):
-        y_dual = tc.zeros(y.shape).to(device)
+        y_dual = tc.zeros(y.shape, dtype=tc.cfloat).to(device)
         _, ind = y.abs().max(dim=dim, keepdim=True)
         range_shape = [1 for _ in range(len(y.shape))]
         range_shape[dim] = -1
@@ -38,17 +39,17 @@ def p_power(matrix, p, err_a=1e-6, s_max=25, v_init=None):
     if p == 1 or np.isinf(p):
         return tc.linalg.matrix_norm(matrix, ord=p), None
    
-    matrix_prime = matrix.conj().transpose(2, 3)
+    matrix_prime = matrix.mH
     
     q = 1 / (1 - 1/p)
     
     x_dims = (dims[0], dims[1], dims[3], 1)
-    x = tc.complex(
-        *[tc.normal(mean=tc.zeros(x_dims), std=1) for _ in range(2)]
-    ).to(device)
-    
+    x = tc.randn(*x_dims, dtype=tc.cfloat).to(device)
+
     if v_init is not None:
-        x = tc.concat([x, v_init], dim=1)
+        # unsqueeze to add the s_max dim
+        # import pdb; pdb.set_trace()
+        x = tc.concat([x, v_init.unsqueeze(1)], dim=1)
         
     x_norm = tc.linalg.vector_norm(x, ord=p, dim=2, keepdims=True)
     x /= x_norm
@@ -67,8 +68,10 @@ def p_power(matrix, p, err_a=1e-6, s_max=25, v_init=None):
         # guess = guess.flatten()
         # print(max(abs(guess - old_guess)))
         if tc.max(abs(guess - old_guess)) < err_a:
-            ran = tc.arange(s_max)
-            v_max = x[:,ind.flatten() == ran, :, :]
+            ran = tc.arange(s_max).reshape((1, s_max, 1, 1))
+            mask = (ind == ran).broadcast_to(x.shape)
+            # v_max has s_max squeezed out
+            v_max = x[mask].reshape(dims[0], dims[3], 1)
             break
         
         z = matrix_prime @ y_dual
