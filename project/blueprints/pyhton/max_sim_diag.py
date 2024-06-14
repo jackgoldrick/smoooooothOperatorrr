@@ -15,7 +15,7 @@ def max_sim_diag(
     step = step * tc.ones(s_max_diag, 1, 1, 1).to(device)
     v_max = tc.zeros(s_max_diag, dim1 * dim2, 1).to(device)
     old_guess = 0
-    q = 1 / (1 - 1/p)
+    q = h_conj(p)
     
     stack_A = matrix_U @ (diags_A * matrix_U_inv)
     stack_A = stack_A.flatten(1, 2)
@@ -24,16 +24,18 @@ def max_sim_diag(
     diags_B = tc.randn(s_max_diag, dim2, dim1, 1, dtype=tc.cfloat).to(device)
     w = tc.randn(s_max_diag, 1, dim1, 1, dtype=tc.cfloat).to(device)
     
-    converged = tc.zeros(s_max_diag, 1, 1, 1).to(device).bool()
-    norm_stack_B = tc.zeros(s_max_diag, 1, 1, 1).to(device)
-    v_max = tc.zeros(s_max_diag, dim1 * dim2, 1).to(device)
+    converged = tc.zeros(s_max_diag, 1, 1, 1, dtype=tc.cfloat).to(device).bool()
+    v_max = tc.randn(s_max_diag, dim1 * dim2, 1, dtype=tc.cfloat).to(device)
+    norm_stack_B = tc.ones(s_max_diag, 1, 1, 1).to(device)
+
      
     while True:
         stack_B = matrix_U @ (diags_B * matrix_U_inv)
         stack_B = stack_B.transpose(1, 2).flatten(2, 3)
         
         flat_converged = converged.flatten()
-        norm_stack_B[~flat_converged,:,0,0], v_max_tmp = p_power(
+        tc.nn.init.ones_(norm_stack_B)
+        norm_stack_B[~flat_converged,0,:,:], v_max_tmp = p_power(
             stack_B[~flat_converged,:,:], p,
             v_init=v_max[~flat_converged,:,:],
             err_a=err_a, s_max=s_max_power
@@ -47,7 +49,6 @@ def max_sim_diag(
             (((w.mH @ matrix_U) * diags_sum.mT) @ matrix_U_inv).mH, 
             q, dim=2
         )
-        # import pdb; pdb.set_trace()
         w = dual( matrix_U @ (diags_sum * (matrix_U_inv @ v)), p, dim=2)
         wH_U = w.mH @ matrix_U
         Uinv_v = matrix_U_inv @ v
