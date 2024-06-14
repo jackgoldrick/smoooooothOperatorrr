@@ -14,7 +14,7 @@
         %% 'vMax3' - a single user defined guess that can be concat to the parallel guess matrix when provided             %%
         %%                                                                                                                 %%
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
-function [res, vMax] = pPower(cMatrix, p, err_a, sMax, vMax3)
+function [res, vMax, maxByV] = pPower(cMatrix, p, err_a, sMax, vMax3)
 
 dims = size(cMatrix);
 colSize = dims(2);

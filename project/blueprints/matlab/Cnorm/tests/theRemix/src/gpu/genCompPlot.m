@@ -118,6 +118,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
     programTime = tic;
     p = 1:dp:pMax;
     sizeP = length(p);
+    maxByV = zeros(length(p));
     if nargin == 9
         if pq == 'g'
             r = rv(1):dr:rv(2);
@@ -184,7 +185,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
 
             else
 
-                [norms(j), vMax] = pPower(cMatrix, p(j), .000000001, sMax, vMax2);
+                [norms(j), vMax, maxByV(j)] = pPower(cMatrix, p(j), .000000001, sMax, vMax2);
                 vMax2 = vMax;
             end 
         end

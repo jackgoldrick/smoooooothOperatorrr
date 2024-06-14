@@ -14,7 +14,9 @@
         %% 'vMax3' - a single user defined guess that can be concat to the parallel guess matrix when provided             %%
         %%                                                                                                                 %%
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
-function [res, vMax] = pPower(cMatrix, p, err_a, sMax, vMax3)
+function [res, vMax, guessedByV] = pPower(cMatrix, p, err_a, sMax, vMax3)
+
+guessedByV = 0;
 
 dims = size(cMatrix);
 colSize = dims(2);
@@ -74,12 +76,16 @@ while (true)
     y = pagemtimes(cMatrix, x);
     
     yDual = dual(y, p);
-
-    [guess, index] = max(vectorPNorm(y, p), [], 2);    
+    
+    yPNorms = vectorPNorm(y, p);
+    [guess, index] = max(yPNorms, [], 2);    
     
     if max(abs(guess - oldGuess)) < err_a
 
         vMax(:, 1, :) = x(:, index == 1:sMax);
+        
+        guessedByV = sum(abs(yPNorms(:,sMax) - guess) < err_a, "all");
+
         break;
     end
 

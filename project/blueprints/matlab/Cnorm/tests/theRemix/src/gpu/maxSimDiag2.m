@@ -34,7 +34,7 @@ matrixUinv = inv(matrixU);
 step = step * ones(1,1,1,sMaxDiag);
 diagonalStackA = reshape(diagonalStackA.', dim1, 1, dim2);
 
-vMax = zeros(dim1 * dim2, 1, sMaxDiag, 'gpuArray');
+vMax = zeros(dim1 * dim2, 1, sMaxDiag);
 % reshapedU = reshape(matrixU, dim1, dim1, 1);
 % reshapedUinv = reshape(matrixUinv, dim1, dim1, 1);
 
@@ -43,8 +43,8 @@ result = 0;
 q = 1 / (1 - 1/p);
 sMaxPower = 50;
 
-stackA = zeros(dim1 *dim2, dim1, 'gpuArray');
-stackB = zeros(dim1, dim1 * dim2, sMaxDiag, 'gpuArray');
+stackA = zeros(dim1 *dim2, dim1);
+stackB = zeros(dim1, dim1 * dim2, sMaxDiag);
 
 
 
@@ -53,19 +53,19 @@ stackA = reshape(permute(stackA, [1 3 2]), dim2 * dim1, dim1, 1);
 
 
 
-[pNormStackA, ~] = pPower(stackA, p, err_a, sMaxPower);
+[pNormStackA, ~] = pPower2(stackA, p, err_a, sMaxPower);
 
 
-v = zeros(dim1, 1, 1, sMaxDiag, 'gpuArray'); %#ok<PREALL>
-
-
-
-
-diagonalStackB = complex(randn(dim1, 1, dim2, sMaxDiag, 'gpuArray'), randn(dim1, 1, dim2, sMaxDiag, 'gpuArray'));
+v = zeros(dim1, 1, 1, sMaxDiag); %#ok<PREALL>
 
 
 
-w = complex(randn(dim1, 1, 1, sMaxDiag, 'gpuArray'), randn(dim1, 1, 1, sMaxDiag,'gpuArray'));
+
+diagonalStackB = complex(randn(dim1, 1, dim2, sMaxDiag), randn(dim1, 1, dim2, sMaxDiag));
+
+
+
+w = complex(randn(dim1, 1, 1, sMaxDiag), randn(dim1, 1, 1, sMaxDiag));
 
 
 
@@ -73,7 +73,7 @@ pNormBA = 0; %#ok<NASGU>
 
 oldGuess = 0;
 
-converged = zeros(1, 1, 1, sMaxDiag, 'gpuArray');
+converged = zeros(1, 1, 1, sMaxDiag);
 
 while (true)
 
@@ -82,8 +82,8 @@ while (true)
     stackB = reshape(stackB, dim1, dim2 * dim1, sMaxDiag);
 
     flatConverged = reshape(converged, 1, []).';
-    normStackB = ones(1, 1, sMaxDiag, 'gpuArray');
-    [normStackB(:,:,~flatConverged), vMax(:,:,~flatConverged)] = pPower(stackB(:,:,~flatConverged), p, err_a, sMaxPower, vMax(:,:,~flatConverged));
+    normStackB = ones(1, 1, sMaxDiag);
+    [normStackB(:,:,~flatConverged), vMax(:,:,~flatConverged)] = pPower2(stackB(:,:,~flatConverged), p, err_a, sMaxPower, vMax(:,:,~flatConverged));
     diagonalStackB = diagonalStackB ./ reshape(normStackB, 1, 1, 1, sMaxDiag);
     % diagSum = reshape(sum((diagonalStackA .* diagonalStackB), 3), dim1, 1, sMaxDiag);
     diagSum = sum((diagonalStackA .* diagonalStackB), 3);

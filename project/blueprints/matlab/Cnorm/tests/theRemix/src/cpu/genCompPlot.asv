@@ -168,7 +168,6 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
 
     end 
     vMax2 = zeros(length(cMatrix(1,:)), 1);
-    vMax3 = zeros(length(cMatrix(1,:)), 1);
     for j = 1:sizeP    
         if pq == 'g'
             for k = 1:sizeR
@@ -187,10 +186,9 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
 
             else
 
-                [norms(j), vMax, guessedByV(j)] = pPower(cMatrix, p(j), .000000001, 100, vMax2);
+                [norms(j), vMax, guessedByV(j)] = pPower(cMatrix, p(j), .000000001, sMax, vMax2);
                 vMax2 = vMax;
-                [norms2(j), vMax4, ~] = pPower(cMatrix, p(j), .000000001, sMax, vMax3);
-                vMax3 = vMax4;
+                [norms2(j), ~]
             end 
         end
     end
@@ -279,7 +277,6 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix)
                     legend("Gradient Algorithm", "pPower Algorithm");
                 else 
                     plot(p, norms, '-b', 'LineWidth', 1);
-                    plot(p, norms2, '-c', 'LineWidth', 1)
                     plot(p, correctNorms, '-r');       
                     plot(p, guessedByV*100, '-g');
                     legend("Our Method", "Exact Value", "GuessedByV");
