@@ -127,7 +127,14 @@ end
 
 
 result = maxGuess;
+
+if nargin ~= 7
+    DSBMaxDesired = 1;
+end
+
 [~, indexMaxMultiple] = maxk(guess, DSBMaxDesired);
+
+
 DSBMaxes = diagonalStackB(:, :, :, indexMaxMultiple);
 
 
