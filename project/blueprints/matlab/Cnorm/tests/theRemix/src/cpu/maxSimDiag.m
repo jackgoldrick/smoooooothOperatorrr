@@ -24,7 +24,7 @@
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
 
 function [result, pNormStackA, DSBMaxes] = maxSimDiag(diagonalStackA, matrixU, p, step, sMaxDiag, err_a, DSBMaxDesired, diagonalStackBGuess)
-DSAOriginal = diagonalStackA;
+%DSAOriginal = diagonalStackA; 
 dims = size(diagonalStackA);
 dim1 = dims(2);
 dim2 = dims(1);

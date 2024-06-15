@@ -23,8 +23,8 @@
 %%                                                                                                                         %%
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
 
-function [result, pNormStackA, DSBMaxes] = maxSimDiag(diagonalStackA, matrixU, p, step, sMaxDiag, err_a, diagonalStackBGuess)
-DSAOriginal = diagonalStackA;
+function [result, pNormStackA, DSBMaxes] = maxSimDiag(diagonalStackA, matrixU, p, step, sMaxDiag, err_a, DSBMaxDesired, diagonalStackBGuess)
+%DSAOriginal = diagonalStackA; %For testing; if you want to test DSBMaxes 
 dims = size(diagonalStackA);
 dim1 = dims(2);
 dim2 = dims(1);
@@ -41,7 +41,7 @@ sMaxPower = 25;
 
 diagonalStackB = complex(randn(dim1, 1, dim2, sMaxDiag), randn(dim1, 1, dim2, sMaxDiag));
 
-if nargin == 7
+if nargin == 8
     diagonalStackB = cat(4, diagonalStackB, diagonalStackBGuess);
     dimsTemp = size(diagonalStackB);
     sMaxDiag = dimsTemp(4);
@@ -127,8 +127,8 @@ end
 
 
 result = maxGuess;
-[~, indexMaxMultiple] = maxk(guess, floor(sMaxDiag / 2));
-DSBMaxes = diagonalStackB(~(~(indexMaxMultiple)))
+[~, indexMaxMultiple] = maxk(guess, DSBMaxDesired);
+DSBMaxes = diagonalStackB(:, :, :, indexMaxMultiple);
 
 
 % pNormStackA;
