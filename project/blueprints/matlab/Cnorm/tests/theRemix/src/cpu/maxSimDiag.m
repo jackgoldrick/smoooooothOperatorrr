@@ -23,15 +23,14 @@
 %%                                                                                                                         %%
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
 
-function [result, pNormStackA] = maxSimDiag(diagonalStackA, matrixU, p, step, sMaxDiag, err_a)
+function [result, pNormStackA, DSBMaxes] = maxSimDiag(diagonalStackA, matrixU, p, step, sMaxDiag, err_a, DSBMaxDesired, diagonalStackBGuess)
+DSAOriginal = diagonalStackA;
 dims = size(diagonalStackA);
 dim1 = dims(2);
 dim2 = dims(1);
 matrixUinv = inv(matrixU);
-step = step * ones(1,1,1,sMaxDiag);
 diagonalStackA = reshape(diagonalStackA.', dim1, 1, dim2);
 
-vMax = zeros(dim1 * dim2, 1, sMaxDiag);
 % reshapedU = reshape(matrixU, dim1, dim1, 1);
 % reshapedUinv = reshape(matrixUinv, dim1, dim1, 1);
 
@@ -40,9 +39,20 @@ result = 0;
 q = 1 / (1 - 1/p);
 sMaxPower = 25;
 
+diagonalStackB = complex(randn(dim1, 1, dim2, sMaxDiag), randn(dim1, 1, dim2, sMaxDiag));
+
+if nargin == 8
+    diagonalStackB = cat(4, diagonalStackB, diagonalStackBGuess);
+    dimsTemp = size(diagonalStackB);
+    sMaxDiag = dimsTemp(4);
+    clear dimsTemp;
+end
+
+vMax = zeros(dim1 * dim2, 1, sMaxDiag);
+step = step * ones(1,1,1,sMaxDiag);
+
 stackA = zeros(dim1 *dim2, dim1);
 stackB = zeros(dim1, dim1 * dim2, sMaxDiag);
-
 
 
 stackA = pagemtimes(matrixU, diagonalStackA .* matrixUinv);
@@ -56,14 +66,7 @@ stackA = reshape(permute(stackA, [1 3 2]), dim2 * dim1, dim1, 1);
 v = zeros(dim1, 1, 1, sMaxDiag); %#ok<PREALL>
 
 
-
-
-diagonalStackB = complex(randn(dim1, 1, dim2, sMaxDiag), randn(dim1, 1, dim2, sMaxDiag));
-
-
-
 w = complex(randn(dim1, 1, 1, sMaxDiag), randn(dim1, 1, 1, sMaxDiag));
-
 
 
 pNormBA = 0; %#ok<NASGU>
@@ -96,7 +99,7 @@ while (true)
     guess = pagemtimes(wPrime_U, (diagSum .* matrixUinv_v));
     guess = abs(guess);
 
-    maxGuess = max(guess, [], "all");
+    [maxGuess, ~] = max(guess, [], "all");
     if (maxGuess > pNormStackA + errorScale * err_a)
         fprintf('Matrix Nrom inequality violated \n');
         pNormStackA
@@ -124,6 +127,9 @@ end
 
 
 result = maxGuess;
+[~, indexMaxMultiple] = maxk(guess, DSBMaxDesired);
+DSBMaxes = diagonalStackB(:, :, :, indexMaxMultiple);
+
 
 % pNormStackA;
 diff = pNormStackA - result; %#ok<NOPRT>
