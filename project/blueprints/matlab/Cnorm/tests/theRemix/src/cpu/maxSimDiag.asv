@@ -24,7 +24,7 @@
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
 
 function [result, pNormStackA, DSBMaxes] = maxSimDiag(diagonalStackA, matrixU, p, step, sMaxDiag, err_a, DSBMaxDesired, diagonalStackBGuess)
-%DSAOriginal = diagonalStackA; 
+DSAOriginal = diagonalStackA; 
 dims = size(diagonalStackA);
 dim1 = dims(2);
 dim2 = dims(1);
@@ -41,11 +41,17 @@ sMaxPower = 25;
 
 diagonalStackB = complex(randn(dim1, 1, dim2, sMaxDiag), randn(dim1, 1, dim2, sMaxDiag));
 
+
 if nargin == 8
-    diagonalStackB = cat(4, diagonalStackB, diagonalStackBGuess);
-    dimsTemp = size(diagonalStackB);
-    sMaxDiag = dimsTemp(4);
-    clear dimsTemp;
+    guessDim1 = size(diagonalStackBGuess, 1);
+    guessDim3 = size(diagonalStackBGuess, 3);
+    if [guessDim1, guessDim3] == [dim1, dim2]
+        diagonalStackB = cat(4, diagonalStackB, diagonalStackBGuess);
+        sMaxDiag = size(diagonalStackB, 4);
+        clear dimsTemp;
+    else
+        fprintf('\nB Diagonal guess not correct data type\n')
+    end
 end
 
 vMax = zeros(dim1 * dim2, 1, sMaxDiag);
@@ -128,7 +134,10 @@ end
 
 result = maxGuess;
 
-if 
+if nargin < 7
+    DSBMaxDesired = 1;
+end
+
 [~, indexMaxMultiple] = maxk(guess, DSBMaxDesired);
 
 
@@ -136,6 +145,7 @@ DSBMaxes = diagonalStackB(:, :, :, indexMaxMultiple);
 
 
 % pNormStackA;
+
 diff = pNormStackA - result; %#ok<NOPRT>
 
 if min(diff,[],"all") < - errorScale * err_a

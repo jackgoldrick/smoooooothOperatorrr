@@ -22,7 +22,7 @@
         %% 'dr' - step size of the value of R                                                                              %%
     %%                                                                                                                         %%
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
-function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, cord)
+function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, cord, bound)
     %% Test Matricies (type)
       % 'a' - 2x4 of 1s on the Diagnol 
       % 'b' - 
@@ -118,7 +118,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
     programTime = tic;
     p = 1:dp:pMax;
     sizeP = length(p);
-    if nargin == 9
+    if nargin >= 9
         if pq == 'g'
             r = rv(1):dr:rv(2);
             sizeR = length(r);
@@ -126,6 +126,15 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
 
         else
             norms = zeros(sizeP, 1);
+            
+            %For Plotting Upper Bound
+            if bound == 'y'
+                normsBound1 = zeros(sizeP, 1);
+                normsBound2 = zeros(sizeP, 1);
+                infNorm = pInf(cMatrix);
+                twoNorm = norm(cMatrix, 2);
+            end
+            
             if ~(length(rv) - 1) %#ok<BDLOG>
                 r = rv;
             else 
@@ -184,8 +193,15 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
             if type == 's'
 
             else
-
                 [norms(j), vMax] = pPower(cMatrix, p(j), .000000001, sMax, vMax2);
+                if bound == 'y'
+                    normsBound1(j) = norms(1)^(1/p(j)) * infNorm^(1-1/p(j));
+                    if p(j) < 2
+                        normsBound2(j) = norms(1)^(2/p(j)-1) * twoNorm^(2-2/p(j));
+                    else
+                        normsBound2(j) = infNorm^(1-2/p(j)) * twoNorm^(2/p(j));
+                    end        
+                end
                 vMax2 = vMax;
                 vs(:,1, j) = vMax; 
             end 
@@ -195,7 +211,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
     toc(compTime)
     
     
-        
+    
     if gp == 'y'
         fprintf('\nCollecting Exact Values... ')
         if type == 'h'
@@ -223,21 +239,35 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
             end
 
         elseif type == 's'
-            if nargin == 10
+            BMaxesDesired = floor(sMax/2); %You can comment this out as you see fit to add input arg that does this with some customization
+            DSBMaxes = 0;
+            if invertableMatrix ~= 0
                 for j = 1:sizeP
-                    [norms(j), correctNorms(j)] = maxSimDiag(cMatrix, invertableMatrix , p(j), 1e-1, sMax, 1e-7);
+                    [norms(j), correctNorms(j), DSBMaxes] = maxSimDiag(cMatrix, invertableMatrix , p(j), 1e-1, sMax, 1e-7);
+
                 end 
             else 
 
                 if (length(N) - 1) %#ok<BDLOG>
 
                     N = N(2);
-                end 
+                end
 
             
                 for j = 1:sizeP
 
-                    [norms(j), correctNorms(j)] = maxSimDiag(cMatrix, hadamard(N) ./ sqrt(N), p(j), 1e-1, sMax, 1e-7);
+                    [norms(j), correctNorms(j), DSBMaxes] = maxSimDiag(cMatrix, hadamard(N) ./ sqrt(N), p(j), 1e-1, sMax, 1e-7, BMaxesDesired, DSBMaxes);
+                    if bound == 'y'
+                        normsBound1(j) = correctNorms(1)^(1/p(j)) * infNorm^(1-1/p(j));
+                        if p(j) < 2
+                            %We know these need to get fixed... our goal rn
+                            %is to ignore though and come back to it
+                            normsBound2(j) = correctNorms(1)^(2/p(j)-1) * twoNorm^(2-2/p(j));
+                        else
+                            normsBound2(j) = infNorm^(1-2/p(j)) * twoNorm^(2/p(j));
+                        end        
+                    end
+              
                 end 
 
             end
@@ -273,11 +303,15 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
                 elseif type == 's' 
                     plot(p, norms, '-b', 'LineWidth', 1);
                     plot(p, correctNorms, '-r');
-                    legend("Gradient Algorithm", "pPower Algorithm");
+                    plot(p, normsBound1, '-g');
+                    plot(p, normsBound2, '-c');
+                    legend("Gradient Algorithm", "pPower Algorithm", "Upper Bound no 1", "Upper Bound no 2");
                 else 
                     plot(p, norms, '-b', 'LineWidth', 1);
                     plot(p, correctNorms, '-r');
-                    legend("Our Method", "Exact Value");
+                    plot(p, normsBound1, '-g');
+                    plot(p, normsBound2, '-c');
+                    legend("Our Method", "Exact Value", "Upper Bound no 1", "Upper Bound no 2");
                 end
             hold off
         fprintf("Done! \n");
@@ -318,7 +352,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
     end
 
 
-    if cord == 'y'
+  if cord == 'y'
         x(1,:) = abs(vs(1, 1, :));
         y(1, :) = abs(vs(2, 1, :));
         size(x)
@@ -426,7 +460,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
             ylabel("Im(y-cord)");
             zlabel("p-value");
             title("3D maximizing coords: y Re vs Im");
-            plot3(yRe, yIm, p);`1
+            plot3(yRe, yIm, p);
         hold off
     end 
     
