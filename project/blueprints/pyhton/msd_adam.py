@@ -51,7 +51,7 @@ def max_sim_diag(
         tc.nn.init.ones_(norm_stack_B)
         norm_stack_B[~flat_converged,0,:,:], v_max_tmp = p_power(
             stack_B[~flat_converged,:,:], p,
-            v_init=v_max[~flat_converged,:,:],
+            v_init=v_max[~flat_converged,:,:], # replace flat con with colon
             err_a=err_a, s_max=s_max_power
         )
         if v_max_tmp is not None:
@@ -114,9 +114,10 @@ def max_sim_diag(
             # diags_B = (mitosis[:,:,:,1] * mitosis[:,:,:,0]) ^ 1/p 
             # 
             # print(diags_B.shape)
+            import pdb; pdb.set_trace()
             diags_B = (parents * parents.transpose(1,2))
             
-            # import pdb; pdb.set_trace()
+            
             generation += 1
             t = 1
             # converged = (0 * converged).bool() 
@@ -141,8 +142,6 @@ def max_sim_diag(
         if (not new_birth):
             gradient = wH_U.mT * diags_A * Uinv_v
             step[converged] = 0
-            
-            
             
             
             A = decay[0] * A + (1 - decay[0]) * ((gradient ** 2))
