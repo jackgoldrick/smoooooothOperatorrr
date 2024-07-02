@@ -114,8 +114,8 @@ def max_sim_diag(
             # diags_B = (mitosis[:,:,:,1] * mitosis[:,:,:,0]) ^ 1/p 
             # 
             # print(diags_B.shape)
-            import pdb; pdb.set_trace()
-            diags_B = (parents * parents.transpose(1,2))
+            # import pdb; pdb.set_trace()
+            diags_B = ((tc.abs(parents * parents) ** (1/p) ) * tc.sgn(parents)) 
             
             
             generation += 1
