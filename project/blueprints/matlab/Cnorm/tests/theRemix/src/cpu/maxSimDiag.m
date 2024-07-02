@@ -23,8 +23,8 @@
 %%                                                                                                                         %%
 %% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%% %%
 
-function [result, pNormStackA, DSBMaxes] = maxSimDiag(diagonalStackA, matrixU, p, step, sMaxDiag, err_a, DSBMaxDesired, diagonalStackBGuess)
-DSAOriginal = diagonalStackA; 
+function [result, pNormStackA, DSBMaxes, proportion] = maxSimDiag(diagonalStackA, matrixU, p, step, sMaxDiag, err_a, DSBMaxDesired, diagonalStackBGuess)
+%DSAOriginal = diagonalStackA; 
 dims = size(diagonalStackA);
 dim1 = dims(2);
 dim2 = dims(1);
@@ -40,6 +40,8 @@ q = 1 / (1 - 1/p);
 sMaxPower = 25;
 
 diagonalStackB = complex(randn(dim1, 1, dim2, sMaxDiag), randn(dim1, 1, dim2, sMaxDiag));
+
+sMaxDiagOriginal = sMaxDiag;
 
 
 if nargin == 8
@@ -142,6 +144,9 @@ end
 
 
 DSBMaxes = diagonalStackB(:, :, :, indexMaxMultiple);
+
+logicalProportion = indexMaxMultiple > sMaxDiagOriginal;
+proportion = sum(logicalProportion) / expectedGuess(sMaxDiagOriginal, sMaxDiag-sMaxDiagOriginal, DSBMaxDesired);
 
 
 % pNormStackA;

@@ -254,19 +254,14 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
                 end
 
             
+                DSBMaxDesired = 10;
+                
+                [norms(1), correctNorms(1), DSBMaxes] = maxSimDiag(cMatrix, hadamard(N) ./ sqrt(N), p(1), 1e-1, sMax, 1e-7, DSBMaxDesired);
+                
                 for j = 1:sizeP
 
-                    [norms(j), correctNorms(j), DSBMaxes] = maxSimDiag(cMatrix, hadamard(N) ./ sqrt(N), p(j), 1e-1, sMax, 1e-7, BMaxesDesired, DSBMaxes);
-                    if bound == 'y'
-                        normsBound1(j) = correctNorms(1)^(1/p(j)) * infNorm^(1-1/p(j));
-                        if p(j) < 2
-                            %We know these need to get fixed... our goal rn
-                            %is to ignore though and come back to it
-                            normsBound2(j) = correctNorms(1)^(2/p(j)-1) * twoNorm^(2-2/p(j));
-                        else
-                            normsBound2(j) = infNorm^(1-2/p(j)) * twoNorm^(2/p(j));
-                        end        
-                    end
+                    [norms(j), correctNorms(j), DSBMaxes] = maxSimDiag(cMatrix, hadamard(N) ./ sqrt(N), p(j), 1e-1, sMax, 1e-7, DSBMaxDesired, DSBMaxes);
+                    
               
                 end 
 
