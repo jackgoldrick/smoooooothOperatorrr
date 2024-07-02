@@ -102,7 +102,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
             end
         
         case 's'
-            if isempty(N) %#ok<BDLOG>
+            if isempty(N) 
                 cMatrix = [2 1; 1 2];
                 N = 2;
             elseif (length(N) - 1) %#ok<BDLOG>
@@ -347,11 +347,11 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
     end
 
 
-  if cord == 'y'
+    if cord == 'y'
         x(1,:) = abs(vs(1, 1, :));
         y(1, :) = abs(vs(2, 1, :));
         size(x)
-        figure3 = figure;
+        figure3 = figure; %#ok<NASGU>
             hold on
                 xlabel("x-cord");
                 ylabel("y-cord");
@@ -365,7 +365,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
 
         yRe(1,:) = real(vs(2, 1, :));
         yIm(1, :) = imag(vs(2, 1, :));
-        figure4 = figure;
+        figure4 = figure; %#ok<NASGU>
             hold on
                 tiledlayout(2,1)
 
@@ -384,7 +384,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
                 
             hold off 
 
-            figure5 = figure;
+            figure5 = figure; %#ok<NASGU>
             hold on
                 tiledlayout(2,1)
 
@@ -403,7 +403,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
                 
             hold off 
 
-        figure6 = figure;
+        figure6 = figure; %#ok<NASGU>
             hold on
                 xlabel("abs(x-cord)");
                 ylabel("abs(y-cord)");
@@ -413,7 +413,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
         
             hold off 
 
-        figure7 = figure;
+        figure7 = figure; %#ok<NASGU>
             hold on
                 xlabel("abs(x-cord)");
                 ylabel("abs(y-cord)");
@@ -422,7 +422,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
                 plot3(x, y, p);
             hold off
 
-        figure8 = figure;
+        figure8 = figure; %#ok<NASGU>
             hold on
                 xlabel("Re(x-cord)");
                 ylabel("Re(y-cord)");
@@ -431,7 +431,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
                 plot3(xRe, yRe, p);
             hold off
 
-        figure9 = figure;
+        figure9 = figure; %#ok<NASGU>
             hold on
                 xlabel("Im(x-cord)");
                 ylabel("Im(y-cord)");
@@ -440,7 +440,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
                 plot3(xIm, yIm, p);
             hold off
 
-        figure10 = figure;
+        figure10 = figure; %#ok<NASGU>
         hold on
             xlabel("Re(x-cord)");
             ylabel("Im(x-cord)");
@@ -449,7 +449,7 @@ function genCompPlot(type, N, dp, pMax, sMax, pq, gp, rv, dr, invertableMatrix, 
             plot3(xRe, xIm, p);
         hold off
 
-        figure11 = figure;
+        figure11 = figure; %#ok<NASGU>
         hold on
             xlabel("Re(y-cord)");
             ylabel("Im(y-cord)");
